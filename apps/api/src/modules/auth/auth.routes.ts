@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { loginBody, registerBody } from '@studysync/shared';
+import { validate } from '../../middleware/validate.js';
+import { authLimiter } from '../../middleware/rateLimit.js';
+import { asyncHandler } from '../../lib/asyncHandler.js';
+import { clearRefreshCookie, readRefreshCookie, setRefreshCookie } from './auth.cookies.js';
+import { login, logout, register, rotateRefreshToken } from './auth.service.js';
+import { authenticate } from '../../middleware/authenticate.js';
+export const authRouter = Router();
+authRouter.post('/register', authLimiter, validate({ body: registerBody }), asyncHandler(async (req, res) => { const result = await register(req.body); setRefreshCookie(res, result.refreshToken); res.status(201).json({ user: result.user, accessToken: result.accessToken }); }));
+authRouter.post('/login', authLimiter, validate({ body: loginBody }), asyncHandler(async (req, res) => { const result = await login(req.body); setRefreshCookie(res, result.refreshToken); res.json({ user: result.user, accessToken: result.accessToken }); }));
+authRouter.post('/refresh', asyncHandler(async (req, res) => { const token = readRefreshCookie(req.headers.cookie); if (!token) { clearRefreshCookie(res); res.status(401).json({ error: { code: 'UNAUTHENTICATED', message: 'Sign in required' } }); return; } const result = await rotateRefreshToken(token); setRefreshCookie(res, result.refreshToken); res.json({ accessToken: result.accessToken }); }));
+authRouter.post('/logout', authenticate, asyncHandler(async (req, res) => { await logout(readRefreshCookie(req.headers.cookie)); clearRefreshCookie(res); res.status(204).end(); }));

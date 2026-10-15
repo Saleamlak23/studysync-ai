@@ -1,0 +1,1 @@
+export function parseLimit(value: unknown, fallback = 50, maximum = 100): number { const parsed = Number(value); return Number.isInteger(parsed) && parsed > 0 ? Math.min(parsed, maximum) : fallback; }

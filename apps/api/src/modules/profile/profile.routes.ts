@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { authenticate } from '../../middleware/authenticate.js';
+import { validate } from '../../middleware/validate.js';
+import { patchProfileBody } from '@studysync/shared';
+import { asyncHandler } from '../../lib/asyncHandler.js';
+import { getProfile, updateProfile } from './profile.service.js';
+export const profileRouter = Router();
+profileRouter.use(authenticate);
+profileRouter.get('/me', asyncHandler(async (req, res) => { res.json(await getProfile(req.user!.id)); }));
+profileRouter.patch('/me', validate({ body: patchProfileBody }), asyncHandler(async (req, res) => { res.json(await updateProfile(req.user!.id, req.body)); }));
