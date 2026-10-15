@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+**/.tsbuild/
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.vscode/*
+!.vscode/extensions.json

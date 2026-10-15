@@ -1,0 +1,44 @@
+{
+  "name": "studysync-ai",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:api dev:web",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/web",
+    "lint": "eslint .",
+    "typecheck": "tsc -b",
+    "test": "npm run test -w apps/api && npm run test -w apps/web",
+    "test:e2e": "playwright test",
+    "db:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "db:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio --schema prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@prisma/client": "^6.0.0",
+    "@playwright/test": "^1.51.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^26.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.5.0",
+    "prisma": "^6.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.0.0"
+  },
+  "allowScripts": {
+    "prisma@6.19.3": true,
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true
+  }
+}
