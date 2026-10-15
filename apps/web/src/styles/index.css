@@ -1,0 +1,9 @@
+@import "./tokens.css";
+
+@layer base {
+  html { font-family: var(--font-sans); background: var(--color-canvas); color: var(--color-fg); -webkit-text-size-adjust: 100%; }
+  body { min-height: 100dvh; font-size: 0.875rem; line-height: 1.25rem; }
+  :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+  ::placeholder { color: var(--color-fg-faint); }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+}

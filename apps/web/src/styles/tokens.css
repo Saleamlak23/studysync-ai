@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-plum-50: #faf3f8;
+  --color-plum-100: #f3e2ee;
+  --color-plum-200: #e7c4dc;
+  --color-plum-300: #d597bf;
+  --color-plum-400: #bc6a9f;
+  --color-plum-500: #9d4580;
+  --color-plum-600: #82336a;
+  --color-plum-700: #692a56;
+  --color-plum-800: #522145;
+  --color-plum-900: #3b1832;
+  --color-lagoon-50: #ecf8f7;
+  --color-lagoon-100: #cfeeeb;
+  --color-lagoon-200: #9fdcd6;
+  --color-lagoon-300: #67c4bc;
+  --color-lagoon-400: #36a8a0;
+  --color-lagoon-500: #1e8f89;
+  --color-lagoon-600: #17746f;
+  --color-lagoon-700: #145c59;
+  --color-lagoon-800: #124846;
+  --color-lagoon-900: #0e3433;
+  --color-stone-25: #faf8f5;
+  --color-stone-50: #f4f1eb;
+  --color-stone-100: #ece8df;
+  --color-stone-200: #e4dfd5;
+  --color-stone-300: #cec7ba;
+  --color-stone-400: #a8a89f;
+  --color-stone-500: #858c86;
+  --color-stone-600: #5b625d;
+  --color-stone-700: #3f4541;
+  --color-stone-900: #1f2321;
+  --color-success-bg: #e6f4ea;
+  --color-success: #2f7d4b;
+  --color-warning-bg: #fdf0d9;
+  --color-warning: #a15c07;
+  --color-danger-bg: #fbe9e7;
+  --color-danger: #b3261e;
+  --color-label-plum: #82336a;
+  --color-label-lagoon: #17746f;
+  --color-label-saffron: #b7860b;
+  --color-label-clay: #b4532a;
+  --color-label-moss: #5e7f2e;
+  --color-label-rose: #c0456b;
+  --color-label-slate: #5b625d;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+  --shadow-sm: 0 1px 2px rgb(31 35 33 / 0.06);
+  --shadow-md: 0 4px 12px rgb(31 35 33 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(31 35 33 / 0.14);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@theme inline {
+  --color-canvas: var(--color-stone-25);
+  --color-surface: var(--color-white);
+  --color-surface-muted: var(--color-stone-50);
+  --color-line: var(--color-stone-200);
+  --color-line-strong: var(--color-stone-300);
+  --color-fg: var(--color-stone-900);
+  --color-fg-muted: var(--color-stone-600);
+  --color-fg-faint: var(--color-stone-500);
+  --color-primary: var(--color-plum-600);
+  --color-primary-hover: var(--color-plum-700);
+  --color-primary-active: var(--color-plum-800);
+  --color-primary-soft: var(--color-plum-50);
+  --color-primary-soft-line: var(--color-plum-200);
+  --color-ai: var(--color-lagoon-600);
+  --color-ai-hover: var(--color-lagoon-700);
+  --color-ai-soft: var(--color-lagoon-50);
+  --color-ai-soft-line: var(--color-lagoon-200);
+  --color-focus: var(--color-plum-400);
+}
+
+:root {
+  --size-sidebar: 15rem;
+  --size-ai-panel: 20rem;
+  --size-header: 3.5rem;
+  --size-bottom-nav: 3.5rem;
+  --size-list: 18rem;
+  --size-touch: 2.75rem;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
