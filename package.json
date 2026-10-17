@@ -1,6 +1,6 @@
 {
   "name": "studysync-ai",
-  "private": true,
+  "private": false,
   "type": "module",
   "workspaces": [
     "apps/*",
