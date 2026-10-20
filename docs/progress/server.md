@@ -19,14 +19,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S01 · Workspaces core
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/workspaces-server-core`
 - Depends on: S00
 - Requirements: FR-WS-01, FR-WS-05 (archive and restore), FR-WS-06
 - Tests: TC-WS-01, TC-WS-06, TC-WS-05 (archive and restore parts)
 - Read first: AGENTS.md 4.1, 7, 8, 9.2, 9.4; docs/API.md section 3; docs/SDD.md 6.1; docs/TEST-PLAN.md 5.2
 - Task: Create (also creates its board and #general channel, creator becomes Owner, one transaction), list, get, update, archive, restore, AI consent.
-- Done in: (branch, date)
+- Done in: feature/workspaces-server-core, 2026-10-20
 
 ### S02 · Members and invite links
 
