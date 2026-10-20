@@ -41,14 +41,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S03 · Board lists and cards
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/board-server-lists-cards`
 - Depends on: S01
 - Requirements: FR-TASK-01, FR-TASK-02
 - Tests: TC-TASK-01, TC-TASK-02
 - Read first: AGENTS.md 7, 8, 9.5; docs/API.md section 4; docs/TEST-PLAN.md 5.3
 - Task: Board read, list CRUD and list move, card CRUD with assignees and labels. Leave assignment notifications as a TODO until S09.
-- Done in: (branch, date)
+- Done in: feature/board-server-lists-cards, 2026-10-20
 
 ### S04 · Comments and labels
 

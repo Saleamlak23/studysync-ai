@@ -16,7 +16,7 @@ apiRouter.use('/auth', authRouter);
 apiRouter.use(profileRouter);
 apiRouter.use('/workspaces', workspacesRouter);
 apiRouter.use(invitesRouter);
-apiRouter.use('/workspaces', boardRouter);
+apiRouter.use(boardRouter);
 apiRouter.use('/workspaces', chatRouter);
 apiRouter.use('/workspaces', filesRouter);
 apiRouter.use('/notifications', notificationsRouter);
