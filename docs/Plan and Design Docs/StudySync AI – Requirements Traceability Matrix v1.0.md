@@ -18,31 +18,31 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-AUTH-01 | Register with name, email, password | 4, 6.1 | POST /auth/register | User | TC-AUTH-01 | Not started |
-| FR-AUTH-02 | Login, logout, rotating refresh tokens | 6.1 | POST /auth/login, /auth/refresh, /auth/logout | User, RefreshToken | TC-AUTH-02 | Not started |
-| FR-AUTH-03 | Passwords stored only as hashes | 6.1, 8 | POST /auth/register | User.passwordHash | TC-AUTH-03 | Not started |
-| FR-AUTH-04 | Role checks on every route and socket event | 6.1 | All protected endpoints; workspace:join | Membership | TC-AUTH-04 | Not started |
-| FR-AUTH-07 | Suspended users cannot log in and are disconnected | 6.1 | POST /auth/login; PATCH /admin/users/:id | User.status, RefreshToken | TC-AUTH-05 | Not started |
-| FR-PROF-01 | Edit name, bio, avatar | 4 | GET and PATCH /me | User | TC-PROF-01 | Not started |
+| FR-AUTH-01 | Register with name, email, password | 4, 6.1 | POST /auth/register | User | TC-AUTH-01 | Passed — S00, `apps/api/src/modules/auth/auth.test.ts` |
+| FR-AUTH-02 | Login, logout, rotating refresh tokens | 6.1 | POST /auth/login, /auth/refresh, /auth/logout | User, RefreshToken | TC-AUTH-02 | Passed — S00, `apps/api/src/modules/auth/auth.test.ts` |
+| FR-AUTH-03 | Passwords stored only as hashes | 6.1, 8 | POST /auth/register | User.passwordHash | TC-AUTH-03 | Passed — S00, `apps/api/src/modules/auth/auth.test.ts` |
+| FR-AUTH-04 | Role checks on every route and socket event | 6.1 | All protected endpoints; workspace:join | Membership | TC-AUTH-04 | Partial — S00 tests unauthenticated profile access; full route and socket role matrix remains for S16 |
+| FR-AUTH-07 | Suspended users cannot log in and are disconnected | 6.1 | POST /auth/login; PATCH /admin/users/:id | User.status, RefreshToken | TC-AUTH-05 | Partial — S00 tests suspended login and refresh; admin suspension and socket disconnection remain for S15 |
+| FR-PROF-01 | Edit name, bio, avatar | 4 | GET and PATCH /me | User | TC-PROF-01 | Partial — S00 tests name and bio; avatar coverage remains |
 | FR-PROF-02 | Personal dashboard of cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 | Not started |
 
 ### 2.2 Workspaces
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-WS-01 | Create a workspace | 4 | POST /workspaces | Workspace, Membership, Board, Channel | TC-WS-01 | Not started |
-| FR-WS-02 | Invite and join by link | 4 | POST /workspaces/:id/invites; POST /invites/:code/join | InviteLink, Membership | TC-WS-02 | Not started |
-| FR-WS-03 | Owner assigns Admin or Member | 6.1 | PATCH /workspaces/:id/members/:userId | Membership | TC-WS-03 | Not started |
-| FR-WS-04 | Remove members | 4 | DELETE /workspaces/:id/members/:userId | Membership | TC-WS-04 | Not started |
-| FR-WS-05 | Archive with 30-day recovery and purge | 6.5 | POST /workspaces/:id/archive and /restore; daily purge job | Workspace.archivedAt | TC-WS-05 | Not started |
-| FR-WS-06 | Owner enables AI and records consent | 6.4 | PUT /workspaces/:id/ai-consent | Workspace.aiEnabled, aiConsentAt | TC-WS-06 | Not started |
+| FR-WS-01 | Create a workspace | 4 | POST /workspaces | Workspace, Membership, Board, Channel | TC-WS-01 | Passed — S01, `apps/api/src/modules/workspaces/workspaces.test.ts` |
+| FR-WS-02 | Invite and join by link | 4 | POST /workspaces/:id/invites; POST /invites/:code/join | InviteLink, Membership | TC-WS-02 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
+| FR-WS-03 | Owner assigns Admin or Member | 6.1 | PATCH /workspaces/:id/members/:userId | Membership | TC-WS-03 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
+| FR-WS-04 | Remove members | 4 | DELETE /workspaces/:id/members/:userId | Membership | TC-WS-04 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
+| FR-WS-05 | Archive with 30-day recovery and purge | 6.5 | POST /workspaces/:id/archive and /restore; daily purge job | Workspace.archivedAt | TC-WS-05 | Partial — S01 archive, restore and expiry checks passed; purge remains for S12 |
+| FR-WS-06 | Owner enables AI and records consent | 6.4 | PUT /workspaces/:id/ai-consent | Workspace.aiEnabled, aiConsentAt | TC-WS-06 | Passed — S01, `apps/api/src/modules/workspaces/workspaces.test.ts` |
 
 ### 2.3 Kanban Board
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-TASK-01 | Create, rename, reorder, delete lists | 4 | POST /workspaces/:id/lists; PATCH, DELETE /lists/:id; POST /lists/:id/move | List | TC-TASK-01 | Not started |
-| FR-TASK-02 | Create, edit, delete cards with assignees, labels, due date | 4 | POST /lists/:id/cards; GET, PATCH, DELETE /cards/:id | Card, CardAssignee, Label, CardLabel | TC-TASK-02 | Not started |
+| FR-TASK-01 | Create, rename, reorder, delete lists | 4 | POST /workspaces/:id/lists; PATCH, DELETE /lists/:id; POST /lists/:id/move | List | TC-TASK-01 | Passed — S03, `apps/api/src/modules/board/board.test.ts` |
+| FR-TASK-02 | Create, edit, delete cards with assignees, labels, due date | 4 | POST /lists/:id/cards; GET, PATCH, DELETE /cards/:id | Card, CardAssignee, Label, CardLabel | TC-TASK-02 | Partial — S03 card CRUD, assignee, and label behavior tested; assignment notification deferred to S09 |
 | FR-TASK-03 | Drag and drop with conflict-safe order | 6.3 | POST /cards/:id/move | Card.position | TC-TASK-03 | Not started |
 | FR-TASK-04 | Board changes appear live for all members | 6.2 | board:card\_created, card\_updated, card\_moved, card\_deleted, list\_changed | none | TC-TASK-04 | Not started |
 | FR-TASK-05 | Comments with mentions | 4 | GET and POST /cards/:id/comments | Comment, Notification | TC-TASK-05 | Not started |
