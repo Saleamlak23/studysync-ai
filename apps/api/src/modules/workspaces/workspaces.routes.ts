@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import {
   createWorkspaceBody,
+  workspaceMemberParams,
   patchWorkspaceBody,
   setWorkspaceAiConsentBody,
+  updateMemberRoleBody,
   workspaceIdParams,
 } from '@studysync/shared';
 import { authenticate } from '../../middleware/authenticate.js';
@@ -19,6 +21,7 @@ import {
   setWorkspaceAiConsent,
   updateWorkspace,
 } from './workspaces.service.js';
+import { listWorkspaceMembers, removeWorkspaceMember, updateMemberRole } from './members.service.js';
 
 export const workspacesRouter = Router();
 workspacesRouter.use(authenticate);
@@ -49,4 +52,17 @@ workspacesRouter.post('/:id/restore', validate({ params: workspaceIdParams }), a
 
 workspacesRouter.put('/:id/ai-consent', validate({ params: workspaceIdParams, body: setWorkspaceAiConsentBody }), loadMembership(), requireRole('OWNER'), asyncHandler(async (req, res) => {
   res.json(await setWorkspaceAiConsent(req.user!.id, req.params.id, req.body));
+}));
+
+workspacesRouter.get('/:id/members', validate({ params: workspaceIdParams }), loadMembership(), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.json(await listWorkspaceMembers(req.params.id));
+}));
+
+workspacesRouter.patch('/:id/members/:userId', validate({ params: workspaceMemberParams, body: updateMemberRoleBody }), loadMembership(), requireRole('OWNER'), asyncHandler(async (req, res) => {
+  res.json(await updateMemberRole(req.params.id, req.params.userId, req.body));
+}));
+
+workspacesRouter.delete('/:id/members/:userId', validate({ params: workspaceMemberParams }), loadMembership(), asyncHandler(async (req, res) => {
+  await removeWorkspaceMember(req.params.id, req.user!.id, req.membership!.role, req.params.userId);
+  res.status(204).end();
 }));

@@ -30,14 +30,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S02 · Members and invite links
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/workspaces-server-members-invites`
 - Depends on: S01
 - Requirements: FR-WS-02, FR-WS-03, FR-WS-04
 - Tests: TC-WS-02, TC-WS-03, TC-WS-04
 - Read first: AGENTS.md 7, 9.4; docs/API.md section 3; docs/SDD.md 6.1; docs/TEST-PLAN.md 5.2
 - Task: List members, change role, remove member (Owner cannot be removed, a member may leave), create, list and revoke invite links, join by link.
-- Done in: (branch, date)
+- Done in: feature/workspaces-server-members-invites, 2026-10-20
 
 ### S03 · Board lists and cards
 
