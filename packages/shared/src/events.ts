@@ -1,7 +1,8 @@
 import type { Message } from './schemas/chat.js';
 import type { Notification } from './schemas/notifications.js';
 
-export const SOCKET_EVENTS = ['workspace:join', 'channel:join', 'channel:leave', 'message:new', 'board:card_created', 'board:card_updated', 'board:card_moved', 'board:card_deleted', 'board:list_changed', 'notification:new'] as const;
+export const NOTIFICATION_NEW_EVENT = 'notification:new' as const;
+export const SOCKET_EVENTS = ['workspace:join', 'channel:join', 'channel:leave', 'message:new', 'board:card_created', 'board:card_updated', 'board:card_moved', 'board:card_deleted', 'board:list_changed', NOTIFICATION_NEW_EVENT] as const;
 export type SocketEvent = (typeof SOCKET_EVENTS)[number];
 export type WorkspaceJoinPayload = { workspaceId: string };
 export type ChannelRoomPayload = { channelId: string };
