@@ -43,8 +43,8 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | --- | --- | --- | --- | --- | --- | --- |
 | FR-TASK-01 | Create, rename, reorder, delete lists | 4 | POST /workspaces/:id/lists; PATCH, DELETE /lists/:id; POST /lists/:id/move | List | TC-TASK-01 | Passed — S03, `apps/api/src/modules/board/board.test.ts` |
 | FR-TASK-02 | Create, edit, delete cards with assignees, labels, due date | 4 | POST /lists/:id/cards; GET, PATCH, DELETE /cards/:id; GET, POST /workspaces/:id/labels | Card, CardAssignee, Label, CardLabel | TC-TASK-02, TC-TASK-05 | Partial — S03 card CRUD and card label behavior, plus S04 workspace label management, tested; assignment notification deferred to S09 |
-| FR-TASK-03 | Drag and drop with conflict-safe order | 6.3 | POST /cards/:id/move | Card.position | TC-TASK-03 | Not started |
-| FR-TASK-04 | Board changes appear live for all members | 6.2 | board:card\_created, card\_updated, card\_moved, card\_deleted, list\_changed | none | TC-TASK-04 | Not started |
+| FR-TASK-03 | Drag and drop with conflict-safe order | 6.3 | POST /cards/:id/move | Card.position | TC-TASK-03 | Implemented — S05; tests added, execution blocked because the configured test database is unavailable |
+| FR-TASK-04 | Board changes appear live for all members | 6.2 | board:card\_created, card\_updated, card\_moved, card\_deleted, list\_changed | none | TC-TASK-04 | Implemented — S05; socket integration test added, execution blocked because the configured test database is unavailable |
 | FR-TASK-05 | Comments with mentions | 4 | GET, POST /cards/:id/comments; DELETE /comments/:id | Comment, Notification | TC-TASK-05 | Partial — S04 comment create/list/delete and mention membership validation tested; mention notifications deferred to S09 |
 
 ### 2.4 Chat and Files

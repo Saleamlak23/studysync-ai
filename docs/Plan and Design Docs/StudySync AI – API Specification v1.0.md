@@ -169,7 +169,7 @@ Connect with `auth: { token: <accessToken> }`. The server validates the token an
 | channel:join, channel:leave | Client to server | { channelId } | Joins `channel:{id}` after a membership check |
 | message:new | Server to client | Message | After the message is saved |
 | board:card\_created, board:card\_updated | Server to client | Card | After the change commits |
-| board:card\_moved | Server to client | { cardId, fromListId, toListId, position } | Clients re-sort locally |
+| board:card\_moved | Server to client | { cardId, fromListId, toListId, position, renumbered? } | `renumbered` is true when other cards' positions changed; clients refetch the board instead of patching locally |
 | board:card\_deleted | Server to client | { cardId, listId } |  |
 | board:list\_changed | Server to client | { lists: \[{ id, name, position }\] } | Create, rename, move or delete of a list |
 | notification:new | Server to client | Notification | Sent to room `user:{id}` |
