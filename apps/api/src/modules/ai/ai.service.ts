@@ -10,6 +10,8 @@ export type AIRequestInput = {
   workspaceId: string;
   feature: AIFeature;
   prompt: string;
+  validateOutput?: (text: string) => boolean;
+  repairPrompt?: (text: string) => string;
 };
 
 export async function assertAiConsent(workspaceId: string) {
@@ -32,12 +34,23 @@ export async function executeAIRequest(
   try {
     await assertAiConsent(input.workspaceId);
     await enforceAiLimits(input.userId, input.workspaceId);
-    const completion = await routeAIRequest(input.prompt, providers);
-    provider = completion.provider;
-    tokensIn = completion.tokensIn;
-    tokensOut = completion.tokensOut;
-    status = 'SUCCESS';
-    return completion;
+    let prompt = input.prompt;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const completion = await routeAIRequest(prompt, providers);
+      provider = completion.provider;
+      tokensIn += completion.tokensIn;
+      tokensOut += completion.tokensOut;
+      if (input.validateOutput && !input.validateOutput(completion.text)) {
+        if (attempt === 0 && input.repairPrompt) {
+          prompt = input.repairPrompt(completion.text);
+          continue;
+        }
+        throw new AppError(502, 'AI_BAD_OUTPUT', 'The AI returned an unusable answer');
+      }
+      status = 'SUCCESS';
+      return completion;
+    }
+    throw new AppError(502, 'AI_BAD_OUTPUT', 'The AI returned an unusable answer');
   } catch (error) {
     if (error instanceof AppError && error.code === 'AI_LIMIT_REACHED') provider = 'none';
     throw error;
