@@ -42,10 +42,10 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | FR-TASK-01 | Create, rename, reorder, delete lists | 4 | POST /workspaces/:id/lists; PATCH, DELETE /lists/:id; POST /lists/:id/move | List | TC-TASK-01 | Passed — S03, `apps/api/src/modules/board/board.test.ts` |
-| FR-TASK-02 | Create, edit, delete cards with assignees, labels, due date | 4 | POST /lists/:id/cards; GET, PATCH, DELETE /cards/:id; GET, POST /workspaces/:id/labels | Card, CardAssignee, Label, CardLabel | TC-TASK-02, TC-TASK-05 | Partial — S03 card CRUD and card label behavior, plus S04 workspace label management, tested; assignment notification deferred to S09 |
+| FR-TASK-02 | Create, edit, delete cards with assignees, labels, due date | 4 | POST /lists/:id/cards; GET, PATCH, DELETE /cards/:id; GET, POST /workspaces/:id/labels | Card, CardAssignee, Label, CardLabel | TC-TASK-02, TC-TASK-05, TC-NOT-01 | Passed — S03/S04/S09; TC-TASK-02, TC-TASK-05 and TC-NOT-01 passed; PR/staging pending |
 | FR-TASK-03 | Drag and drop with conflict-safe order | 6.3 | POST /cards/:id/move | Card.position | TC-TASK-03 | Implemented — S05; tests added, execution blocked because the configured test database is unavailable |
 | FR-TASK-04 | Board changes appear live for all members | 6.2 | board:card\_created, card\_updated, card\_moved, card\_deleted, list\_changed | none | TC-TASK-04 | Implemented — S05; socket integration test added, execution blocked because the configured test database is unavailable |
-| FR-TASK-05 | Comments with mentions | 4 | GET, POST /cards/:id/comments; DELETE /comments/:id | Comment, Notification | TC-TASK-05 | Partial — S04 comment create/list/delete and mention membership validation tested; mention notifications deferred to S09 |
+| FR-TASK-05 | Comments with mentions | 4 | GET, POST /cards/:id/comments; DELETE /comments/:id | Comment, Notification | TC-TASK-05, TC-NOT-01 | Passed — S04/S09; TC-TASK-05 and TC-NOT-01 passed; PR/staging pending |
 
 ### 2.4 Chat and Files
 
@@ -53,7 +53,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | --- | --- | --- | --- | --- | --- | --- |
 | FR-CHAT-01 | Channels per workspace | 4 | GET and POST /workspaces/:id/channels; DELETE /channels/:id | Channel | TC-CHAT-01 | Implemented — TC-CHAT-01 passed |
 | FR-CHAT-02 | Messages saved and delivered live | 6.2 | POST /channels/:id/messages; message:new | Message | TC-CHAT-02 | Implemented — TC-CHAT-02 passed, including member-only socket delivery |
-| FR-CHAT-03 | Mentions notify members | 4 | POST /channels/:id/messages (mentionIds) | Notification | TC-CHAT-03 | Partial — member mention validation passed; notification delivery deferred to S09 / TC-NOT-01 |
+| FR-CHAT-03 | Mentions notify members | 4 | POST /channels/:id/messages (mentionIds) | Notification | TC-CHAT-03, TC-NOT-01 | Passed — S07/S09; TC-CHAT-03 and TC-NOT-01 passed; PR/staging pending |
 | FR-CHAT-04 | Share a file in chat | 6.6 | POST /channels/:id/messages (fileId) | Message.fileId, File | TC-CHAT-04 | Passed — S08 uploaded attachment integration; foreign-workspace file rejected |
 | FR-CHAT-05 | Catch up after reconnect without duplicates | 6.2 | GET /channels/:id/messages?after= | Message | TC-CHAT-05 | Implemented — TC-CHAT-05 passed for initial, before, and bounded after pages |
 | FR-FILE-01 | Upload with type and size limits | 6.6 | POST /workspaces/:id/files | File, FileBlob | TC-FILE-01 | Passed — S08, allowed types and file/workspace size limits verified |
@@ -64,8 +64,8 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-NOT-01 | In-app notifications, delivered live | 6.2 | GET /notifications; notification:new | Notification | TC-NOT-01 | Not started |
-| FR-NOT-02 | Mark read or unread | 4 | POST /notifications/:id/read and /read-all | Notification.readAt | TC-NOT-02 | Not started |
+| FR-NOT-01 | In-app notifications, delivered live | 6.2 | GET /notifications; notification:new | Notification | TC-NOT-01 | Passed — S09; TC-NOT-01 passed; PR/staging pending |
+| FR-NOT-02 | Mark read or unread | 4 | POST /notifications/:id/read and /read-all | Notification.readAt | TC-NOT-02 | Passed — S09; TC-NOT-02 passed; PR/staging pending |
 | FR-NOT-03 | Scheduled deadline reminders without duplicates | 6.5 | Scheduled job; notification:new | Reminder, Notification | TC-NOT-03 | Not started |
 
 ### 2.6 AI Features
