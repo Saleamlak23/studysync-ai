@@ -118,14 +118,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S10 · AI providers and limits
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/ai-server-providers-limits`
 - Depends on: S01
 - Requirements: FR-AI-05, 06, 07
 - Tests: TC-AI-05, 06, 07
 - Read first: AGENTS.md 9.9; docs/SDD.md 6.4; docs/API.md section 8; docs/TEST-PLAN.md 5.6
 - Task: AIProvider interface, Groq and Gemini, router (30 s deadline, one retry, fallback), consent check, limits from AppSetting with env defaults, AIRequestLog (metadata only), mock provider for tests.
-- Done in: (branch, date)
+- Done in: feature/ai-server-providers-limits, 2026-10-22
 
 ### S11 · AI features
 
