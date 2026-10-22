@@ -6,7 +6,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ## Tasks
 
-### S00 · Starter project
+### S00 Â· Starter project
 
 - Status: done
 - Suggested branch: `chore/project-scaffold`
@@ -17,7 +17,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Monorepo, CI, `packages/shared`, Prisma migration and seed, server auth and profile modules, empty module routers, client placeholders only.
 - Done in: feature/api-starter-foundation, 2026-10-17
 
-### S01 · Workspaces core
+### S01 Â· Workspaces core
 
 - Status: done
 - Suggested branch: `feature/workspaces-server-core`
@@ -28,7 +28,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Create (also creates its board and #general channel, creator becomes Owner, one transaction), list, get, update, archive, restore, AI consent.
 - Done in: feature/workspaces-server-core, 2026-10-20
 
-### S02 · Members and invite links
+### S02 Â· Members and invite links
 
 - Status: done
 - Suggested branch: `feature/workspaces-server-members-invites`
@@ -39,7 +39,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: List members, change role, remove member (Owner cannot be removed, a member may leave), create, list and revoke invite links, join by link.
 - Done in: feature/workspaces-server-members-invites, 2026-10-20
 
-### S03 · Board lists and cards
+### S03 Â· Board lists and cards
 
 - Status: done
 - Suggested branch: `feature/board-server-lists-cards`
@@ -50,7 +50,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Board read, list CRUD and list move, card CRUD with assignees and labels. Leave assignment notifications as a TODO until S09.
 - Done in: feature/board-server-lists-cards, 2026-10-20
 
-### S04 · Comments and labels
+### S04 Â· Comments and labels
 
 - Status: done
 - Suggested branch: `feature/board-server-comments-labels`
@@ -61,7 +61,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Card comments (list, create, delete) and workspace labels (list, create). Mentions create notifications later: leave a TODO.
 - Done in: feature/board-server-comments-labels, 2026-10-22
 
-### S05 · Card move and board real-time
+### S05 Â· Card move and board real-time
 
 - Status: done
 - Suggested branch: `feature/board-server-move-realtime`
@@ -72,7 +72,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Fractional ordering with renumbering, socket authentication and rooms, all board:* events after commit. Document the extra `renumbered` field in the event payload.
 - Done in: feature/board-server-move-realtime, 2026-10-22
 
-### S06 · Personal dashboard data
+### S06 Â· Personal dashboard data
 
 - Status: done
 - Suggested branch: `feature/profile-server-dashboard`
@@ -83,7 +83,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: GET /me/dashboard: the user's assigned cards and upcoming deadlines across workspaces, soonest first.
 - Done in: feature/profile-server-dashboard, 2026-10-22
 
-### S07 · Channels and messages
+### S07 Â· Channels and messages
 
 - Status: done
 - Suggested branch: `feature/chat-server-channels-messages`
@@ -94,7 +94,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Channels (list, create, delete), messages (before and after cursors, mentionIds), message:new, channel rooms, catch-up without duplicates. Leave mention notifications as a TODO.
 - Done in: feature/chat-server-channels-messages, 2026-10-22
 
-### S08 · File storage
+### S08 Â· File storage
 
 - Status: done
 - Suggested branch: `feature/files-server-storage`
@@ -105,7 +105,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Upload to PostgreSQL (FileBlob), type allowlist, 5 MB limit, workspace cap, list, streamed download after membership check, attach to a chat message.
 - Done in: feature/files-server-storage, 2026-10-22
 
-### S09 · Notifications
+### S09 Â· Notifications
 
 - Status: done
 - Suggested branch: `feature/notifications-server-core`
@@ -116,7 +116,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: List, mark read, mark all read, notification:new to the user room. Replace the TODOs for assignment and mention notifications in the board and chat modules.
 - Done in: feature/notifications-server-core, 2026-10-22
 
-### S10 · AI providers and limits
+### S10 Â· AI providers and limits
 
 - Status: done
 - Suggested branch: `feature/ai-server-providers-limits`
@@ -127,7 +127,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: AIProvider interface, Groq and Gemini, router (30 s deadline, one retry, fallback), consent check, limits from AppSetting with env defaults, AIRequestLog (metadata only), mock provider for tests.
 - Done in: feature/ai-server-providers-limits, 2026-10-22
 
-### S11 · AI features
+### S11 Â· AI features
 
 - Status: done
 - Suggested branch: `feature/ai-server-features`
@@ -138,7 +138,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Ask, summarize (chat range, card, TXT, PDF, DOCX), breakdown preview and confirm (one transaction, events after commit), prompt-injection protection, clean failures.
 - Done in: feature/ai-server-features, 2026-10-22
 
-### S12 · Reminder and purge jobs
+### S12 Â· Reminder and purge jobs
 
 - Status: done
 - Suggested branch: `feature/jobs-server-reminders-purge`
@@ -149,7 +149,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Reminder job every 15 minutes (no duplicates) and the daily purge of workspaces archived more than 30 days ago.
 - Done in: feature/jobs-server-reminders-purge, 2026-10-22
 
-### S13 · Search
+### S13 Â· Search
 
 - Status: done
 - Suggested branch: `feature/search-server-fulltext`
@@ -160,18 +160,18 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: Workspace search over cards, messages and file names with snippets, membership enforced, query of 2+ characters.
 - Done in: feature/search-server-fulltext, 2026-10-22
 
-### S14 · Workspace dashboard data
+### S14 Â· Workspace dashboard data
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/dashboard-server-workspace`
 - Depends on: S03
 - Requirements: FR-ANA-01
 - Tests: TC-ANA-01
 - Read first: AGENTS.md 8, 15; docs/API.md section 9; docs/TEST-PLAN.md 5.7
 - Task: Cards per list, overdue, completed vs open (completed = card in the last list), contribution per member.
-- Done in: (branch, date)
+- Done in: feature/dashboard-server-workspace, 2026-10-22
 
-### S15 · System admin
+### S15 Â· System admin
 
 - Status: todo
 - Suggested branch: `feature/admin-server-users-ai`
@@ -182,7 +182,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Task: List and search users, suspend and reactivate (revokes refresh tokens, disconnects sockets), AI usage report, GET and PUT /admin/ai-limits.
 - Done in: (branch, date)
 
-### S16 · Hardening and security tests
+### S16 Â· Hardening and security tests
 
 - Status: todo
 - Suggested branch: `feature/hardening-server-security-tests`
