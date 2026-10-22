@@ -85,14 +85,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S07 · Channels and messages
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/chat-server-channels-messages`
 - Depends on: S05
 - Requirements: FR-CHAT-01, 02, 03, 05
 - Tests: TC-CHAT-01, 02, 03, 05
 - Read first: AGENTS.md 7, 9.7; docs/API.md sections 5 and 11; docs/SDD.md 6.2; docs/TEST-PLAN.md 5.4
 - Task: Channels (list, create, delete), messages (before and after cursors, mentionIds), message:new, channel rooms, catch-up without duplicates. Leave mention notifications as a TODO.
-- Done in: (branch, date)
+- Done in: feature/chat-server-channels-messages, 2026-10-22
 
 ### S08 · File storage
 

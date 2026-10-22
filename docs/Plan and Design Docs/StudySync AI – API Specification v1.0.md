@@ -40,7 +40,8 @@ All errors return `{ "error": { "code": "...", "message": "...", "details": [...
 | User | id, name, email, avatarUrl, bio, systemRole, status (email only for the user themselves and workspace Admins) |
 | Workspace | id, name, description, aiEnabled, archivedAt, myRole |
 | Card | id, listId, title, description, priority, dueDate, position, assignees\[\], labels\[\], commentCount, createdAt, updatedAt |
-| Message | id, channelId, author {id, name, avatarUrl} or null, content, file or null, createdAt |
+| Channel | id, workspaceId, name, createdAt |
+| Message | id, channelId, author {id, name, avatarUrl} or null, content, file {id, name, mimeType, sizeBytes, uploader, createdAt} or null, createdAt |
 | File | id, name, mimeType, sizeBytes, uploader, createdAt (never the file bytes) |
 | Notification | id, type, workspaceId, payload, readAt, createdAt |
 
@@ -104,8 +105,8 @@ A card's status is the list it sits in. Positions are computed by the server; cl
 | GET /workspaces/:id/channels | Member | none | 200 `[Channel]` |
 | POST /workspaces/:id/channels | Admin | name | 201 Channel; 409 on duplicate name |
 | DELETE /channels/:id | Admin | none | 204 |
-| GET /channels/:id/messages | Member | limit?, before?, after? (message ids) | 200 `{ messages, nextCursor }`; `after` is the reconnect catch-up call and returns messages in ascending order |
-| POST /channels/:id/messages | Member | content, fileId?, mentionIds? | 201 Message; broadcast as `message:new` |
+| GET /channels/:id/messages | Member | limit? (default 50, max 100), before?, after? (message ids) | 200 `{ messages, nextCursor }`; initial and `before` pages are chronological; `before` and `after` cannot be combined. `nextCursor` is the oldest returned message when older results remain, and the latest returned message for a capped `after` page when newer results remain. `after` returns messages in ascending order for reconnect catch-up. |
+| POST /channels/:id/messages | Member | content, fileId?, mentionIds? | 201 Message; optional file must belong to the channel workspace; mention IDs must be workspace members. Broadcast as `message:new` after commit. Mention notifications are added in S09. |
 | PATCH /messages/:id (S) | Author | content | 200 Message |
 | DELETE /messages/:id (S) | Admin or author | none | 204; soft delete |
 

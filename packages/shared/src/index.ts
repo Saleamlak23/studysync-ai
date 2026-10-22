@@ -9,3 +9,4 @@ export * from './schemas/workspaces.js';
 export * from './schemas/board.js';
 export * from './schemas/ai.js';
 export * from './schemas/dashboard.js';
+export * from './schemas/chat.js';

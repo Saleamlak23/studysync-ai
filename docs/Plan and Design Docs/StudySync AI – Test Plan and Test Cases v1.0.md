@@ -91,7 +91,7 @@ AI tests use the mocked provider unless marked manual.
 | --- | --- | --- | --- | --- |
 | TC-CHAT-01 | FR-CHAT-01 | Create a channel as Admin and Member; repeat a name | Admin 201; Member 403; duplicate 409 | I |
 | TC-CHAT-02 | FR-CHAT-02 | Client A posts; client B is in the channel; client C is outside | B receives message:new; C does not; message stored | S |
-| TC-CHAT-03 | FR-CHAT-03 | Post a message with a mention | Mentioned user gets a notification | I |
+| TC-CHAT-03 | FR-CHAT-03 | Post a message with workspace-member and non-member mention IDs | S07 validates workspace membership; notification delivery is deferred to S09 and verified with TC-NOT-01 | I |
 | TC-CHAT-04 | FR-CHAT-04 | Upload a file and post it with fileId; use a file from another workspace | Message shows the file; foreign file rejected | I |
 | TC-CHAT-05 | FR-CHAT-05 | Disconnect a client for 30 s while others post; reconnect | Missed messages load in order with no duplicates | S, M |
 | TC-FILE-01 | FR-FILE-01 | Upload each allowed type; a file of 5 MB plus 1 byte; a disallowed type; exceed the workspace cap | Allowed 201; too large 413; type 415; cap 413 STORAGE\_LIMIT\_REACHED | I |

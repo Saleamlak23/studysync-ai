@@ -51,11 +51,11 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-CHAT-01 | Channels per workspace | 4 | GET and POST /workspaces/:id/channels; DELETE /channels/:id | Channel | TC-CHAT-01 | Not started |
-| FR-CHAT-02 | Messages saved and delivered live | 6.2 | POST /channels/:id/messages; message:new | Message | TC-CHAT-02 | Not started |
-| FR-CHAT-03 | Mentions notify members | 4 | POST /channels/:id/messages (mentionIds) | Notification | TC-CHAT-03 | Not started |
+| FR-CHAT-01 | Channels per workspace | 4 | GET and POST /workspaces/:id/channels; DELETE /channels/:id | Channel | TC-CHAT-01 | Implemented — TC-CHAT-01 passed |
+| FR-CHAT-02 | Messages saved and delivered live | 6.2 | POST /channels/:id/messages; message:new | Message | TC-CHAT-02 | Implemented — TC-CHAT-02 passed, including member-only socket delivery |
+| FR-CHAT-03 | Mentions notify members | 4 | POST /channels/:id/messages (mentionIds) | Notification | TC-CHAT-03 | Partial — member mention validation passed; notification delivery deferred to S09 / TC-NOT-01 |
 | FR-CHAT-04 | Share a file in chat | 6.6 | POST /channels/:id/messages (fileId) | Message.fileId, File | TC-CHAT-04 | Not started |
-| FR-CHAT-05 | Catch up after reconnect without duplicates | 6.2 | GET /channels/:id/messages?after= | Message | TC-CHAT-05 | Not started |
+| FR-CHAT-05 | Catch up after reconnect without duplicates | 6.2 | GET /channels/:id/messages?after= | Message | TC-CHAT-05 | Implemented — TC-CHAT-05 passed for initial, before, and bounded after pages |
 | FR-FILE-01 | Upload with type and size limits | 6.6 | POST /workspaces/:id/files | File, FileBlob | TC-FILE-01 | Not started |
 | FR-FILE-02 | Download only for workspace members | 6.6 | GET /files/:id | File, FileBlob, Membership | TC-FILE-02 | Not started |
 | FR-FILE-03 | List workspace files | 4 | GET /workspaces/:id/files | File | TC-FILE-03 | Not started |
