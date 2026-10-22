@@ -85,7 +85,7 @@ docs/                  SRS, SDD, ERD, API specification, test plan, traceability
 2. Start PostgreSQL. With Docker:
 
    ```bash
-   docker run --name studysync-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=studysync -p 5432:5432 -d postgres:16
+   docker run --name studysync-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=studysync_ai -p 5432:5432 -d postgres:16
    ```
 
 3. Create the environment files from the template and fill in the secrets:
@@ -107,7 +107,7 @@ docs/                  SRS, SDD, ERD, API specification, test plan, traceability
    npx prisma migrate dev --schema prisma/schema.prisma
    ```
 
-5. Load sample data and start both apps:
+5. Load sample data and start both apps. `npm run db:seed` reads `apps/api/.env`; the seed adds or verifies demo fixtures without deleting existing users or workspace data, and is safe to rerun:
 
    ```bash
    npm run db:seed
@@ -137,7 +137,7 @@ Defined in `.env.example`. Never commit a real `.env` file.
 
 | Variable | Used by | Purpose |
 |---|---|---|
-| `DATABASE_URL` | API | PostgreSQL connection string |
+| `DATABASE_URL` | API | PostgreSQL connection string; the local database name is `studysync_ai` |
 | `PORT` | API | API port (default 4000) |
 | `CLIENT_ORIGIN` | API | Allowed web origin for CORS and cookies |
 | `JWT_SECRET`, `REFRESH_SECRET` | API | Secrets for access and refresh tokens (long random strings) |
