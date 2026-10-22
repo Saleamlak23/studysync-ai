@@ -173,14 +173,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S15 Â· System admin
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/admin-server-users-ai`
 - Depends on: S10
 - Requirements: FR-ADM-01, 02; FR-AUTH-07
 - Tests: TC-ADM-01, 02; TC-AUTH-05
 - Read first: AGENTS.md 7, 8, 9.4; docs/API.md section 10; docs/TEST-PLAN.md 5.1 and 5.7
 - Task: List and search users, suspend and reactivate (revokes refresh tokens, disconnects sockets), AI usage report, GET and PUT /admin/ai-limits.
-- Done in: (branch, date)
+- Done in: feature/admin-server-users-ai, 2026-10-22
 
 ### S16 Â· Hardening and security tests
 
