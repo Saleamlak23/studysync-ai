@@ -140,14 +140,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S12 · Reminder and purge jobs
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/jobs-server-reminders-purge`
 - Depends on: S09
 - Requirements: FR-NOT-03, FR-WS-05 (purge)
 - Tests: TC-NOT-03, TC-WS-05 (purge part)
 - Read first: AGENTS.md 9.10; docs/SDD.md 6.5; docs/TEST-PLAN.md 5.2 and 5.5
 - Task: Reminder job every 15 minutes (no duplicates) and the daily purge of workspaces archived more than 30 days ago.
-- Done in: (branch, date)
+- Done in: feature/jobs-server-reminders-purge, 2026-10-22
 
 ### S13 · Search
 

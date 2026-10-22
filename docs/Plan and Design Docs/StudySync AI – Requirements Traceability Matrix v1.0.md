@@ -34,7 +34,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | FR-WS-02 | Invite and join by link | 4 | POST /workspaces/:id/invites; POST /invites/:code/join | InviteLink, Membership | TC-WS-02 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
 | FR-WS-03 | Owner assigns Admin or Member | 6.1 | PATCH /workspaces/:id/members/:userId | Membership | TC-WS-03 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
 | FR-WS-04 | Remove members | 4 | DELETE /workspaces/:id/members/:userId | Membership | TC-WS-04 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
-| FR-WS-05 | Archive with 30-day recovery and purge | 6.5 | POST /workspaces/:id/archive and /restore; daily purge job | Workspace.archivedAt | TC-WS-05 | Partial — S01 archive, restore and expiry checks passed; purge remains for S12 |
+| FR-WS-05 | Archive with 30-day recovery and purge | 6.5 | POST /workspaces/:id/archive and /restore; daily purge job | Workspace.archivedAt | TC-WS-05 | Passed — S01 archive and restore; S12 purge and cascade coverage in `apps/api/src/jobs/jobs.test.ts` |
 | FR-WS-06 | Owner enables AI and records consent | 6.4 | PUT /workspaces/:id/ai-consent | Workspace.aiEnabled, aiConsentAt | TC-WS-06 | Passed — S01, `apps/api/src/modules/workspaces/workspaces.test.ts` |
 
 ### 2.3 Kanban Board
@@ -66,7 +66,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | --- | --- | --- | --- | --- | --- | --- |
 | FR-NOT-01 | In-app notifications, delivered live | 6.2 | GET /notifications; notification:new | Notification | TC-NOT-01 | Passed — S09; TC-NOT-01 passed; PR/staging pending |
 | FR-NOT-02 | Mark read or unread | 4 | POST /notifications/:id/read and /read-all | Notification.readAt | TC-NOT-02 | Passed — S09; TC-NOT-02 passed; PR/staging pending |
-| FR-NOT-03 | Scheduled deadline reminders without duplicates | 6.5 | Scheduled job; notification:new | Reminder, Notification | TC-NOT-03 | Not started |
+| FR-NOT-03 | Scheduled deadline reminders without duplicates | 6.5 | Scheduled job; notification:new | Reminder, Notification | TC-NOT-03 | Passed — S12; `apps/api/src/jobs/jobs.test.ts` |
 
 ### 2.6 AI Features
 
