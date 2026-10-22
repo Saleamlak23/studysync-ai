@@ -63,14 +63,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S05 · Card move and board real-time
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/board-server-move-realtime`
 - Depends on: S03
 - Requirements: FR-TASK-03, FR-TASK-04
 - Tests: TC-TASK-03, TC-TASK-04
 - Read first: AGENTS.md 7.3, 9.5, 9.7; docs/SDD.md 6.2, 6.3; docs/TEST-PLAN.md 5.3
 - Task: Fractional ordering with renumbering, socket authentication and rooms, all board:* events after commit. Document the extra `renumbered` field in the event payload.
-- Done in: (branch, date)
+- Done in: feature/board-server-move-realtime, 2026-10-22
 
 ### S06 · Personal dashboard data
 

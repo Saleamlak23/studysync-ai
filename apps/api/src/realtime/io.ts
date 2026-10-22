@@ -29,3 +29,4 @@ export function initIo(server: HttpServer): Server {
   return io;
 }
 export function getIo(): Server { if (!io) throw new Error('Socket.io has not been initialized'); return io; }
+export function isIoInitialized(): boolean { return io !== undefined; }

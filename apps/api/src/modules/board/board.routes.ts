@@ -8,6 +8,7 @@ import {
   createListBody,
   listIdParams,
   moveListBody,
+  moveCardBody,
   patchCardBody,
   patchListBody,
   workspaceIdParams,
@@ -18,7 +19,7 @@ import { loadMembership, withWorkspace } from '../../middleware/attachMembership
 import { requireRole } from '../../middleware/requireRole.js';
 import { validate } from '../../middleware/validate.js';
 import { getBoard } from './board.service.js';
-import { createCard, deleteCard, getCard, getCardWorkspaceId, updateCard } from './cards.service.js';
+import { createCard, deleteCard, getCard, getCardWorkspaceId, moveCard, updateCard } from './cards.service.js';
 import { createComment, deleteComment, getCommentWorkspaceId, listCardComments } from './comments.service.js';
 import { createLabel, listWorkspaceLabels } from './labels.service.js';
 import { createList, deleteList, getListWorkspaceId, moveList, renameList } from './lists.service.js';
@@ -57,6 +58,10 @@ boardRouter.get('/cards/:id', validate({ params: cardIdParams }), withWorkspace(
 
 boardRouter.patch('/cards/:id', validate({ params: cardIdParams, body: patchCardBody }), withWorkspace((req) => getCardWorkspaceId(req.params.id)), requireRole('MEMBER'), asyncHandler(async (req, res) => {
   res.json(await updateCard(req.params.id, req.body));
+}));
+
+boardRouter.post('/cards/:id/move', validate({ params: cardIdParams, body: moveCardBody }), withWorkspace((req) => getCardWorkspaceId(req.params.id)), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.json(await moveCard(req.params.id, req.body));
 }));
 
 boardRouter.delete('/cards/:id', validate({ params: cardIdParams }), withWorkspace((req) => getCardWorkspaceId(req.params.id)), asyncHandler(async (req, res) => {

@@ -1,7 +1,11 @@
 import request from 'supertest';
+import { createServer } from 'node:http';
+// Reuse the already installed workspace Socket.io client for end-to-end protocol coverage.
+import { io as connectSocket } from '../../../../web/node_modules/socket.io-client/build/esm/index.js';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../db/prisma.js';
+import { initIo } from '../../realtime/io.js';
 
 const app = createApp();
 
@@ -294,6 +298,140 @@ describe('board lists and cards', () => {
       .delete(`/api/v1/cards/${secondCard.body.id as string}`)
       .set(auth(owner.token));
     expect(ownerDelete.status).toBe(204);
+  });
+
+  it('TC-TASK-03: moves cards within and between lists with serialized unique positions', async () => {
+    const owner = await register('Move Owner');
+    const member = await register('Move Member');
+    const outsider = await register('Move Outsider');
+    const workspaceId = await createWorkspace(owner.token);
+    await prisma.membership.create({ data: { userId: member.id, workspaceId, role: 'MEMBER' } });
+    const otherWorkspaceId = await createWorkspace(owner.token);
+    const listA = await request(app).post(`/api/v1/workspaces/${workspaceId}/lists`).set(auth(owner.token)).send({ name: 'A' });
+    const listB = await request(app).post(`/api/v1/workspaces/${workspaceId}/lists`).set(auth(owner.token)).send({ name: 'B' });
+    const foreignList = await request(app).post(`/api/v1/workspaces/${otherWorkspaceId}/lists`).set(auth(owner.token)).send({ name: 'Foreign' });
+    const create = async (listId: string, title: string) => request(app).post(`/api/v1/lists/${listId}/cards`).set(auth(member.token)).send({ title });
+    const cards = await Promise.all(['One', 'Two', 'Three', 'Four'].map((title) => create(listA.body.id as string, title)));
+    expect(cards.map((response) => response.status)).toEqual([201, 201, 201, 201]);
+    const [one, two, three, four] = cards.map((response) => response.body as { id: string });
+
+    const noAuth = await request(app).post(`/api/v1/cards/${one.id}/move`).send({ toListId: listB.body.id });
+    expect(noAuth.status).toBe(401);
+    const outsiderMove = await request(app).post(`/api/v1/cards/${one.id}/move`).set(auth(outsider.token)).send({ toListId: listB.body.id });
+    expect(outsiderMove.status).toBe(404);
+    const invalidTarget = await request(app).post(`/api/v1/cards/${one.id}/move`).set(auth(member.token)).send({ toListId: foreignList.body.id });
+    expect(invalidTarget.status).toBe(400);
+    const invalidNeighbor = await request(app).post(`/api/v1/cards/${one.id}/move`).set(auth(member.token)).send({ toListId: listB.body.id, afterCardId: two.id });
+    expect(invalidNeighbor.status).toBe(400);
+    const missingCard = await request(app).post(`/api/v1/cards/${crypto.randomUUID()}/move`).set(auth(member.token)).send({ toListId: listB.body.id });
+    expect(missingCard.status).toBe(404);
+
+    const movedToEnd = await request(app).post(`/api/v1/cards/${two.id}/move`).set(auth(member.token)).send({ toListId: listB.body.id });
+    const movedToBeginning = await request(app).post(`/api/v1/cards/${three.id}/move`).set(auth(member.token)).send({ toListId: listB.body.id });
+    expect(movedToEnd.status).toBe(200);
+    expect(movedToBeginning.status).toBe(200);
+    const movedWithinList = await request(app).post(`/api/v1/cards/${four.id}/move`).set(auth(member.token)).send({ toListId: listA.body.id });
+    expect(movedWithinList.status).toBe(200);
+    const concurrentlyMoved = await Promise.all([
+      request(app).post(`/api/v1/cards/${one.id}/move`).set(auth(member.token)).send({ toListId: listB.body.id, afterCardId: three.id }),
+      request(app).post(`/api/v1/cards/${four.id}/move`).set(auth(member.token)).send({ toListId: listB.body.id, afterCardId: three.id }),
+    ]);
+    expect(concurrentlyMoved.map((response) => response.status)).toEqual([200, 200]);
+    const targetCards = await prisma.card.findMany({ where: { listId: listB.body.id as string }, orderBy: { position: 'asc' } });
+    expect(new Set(targetCards.map(({ position }) => position)).size).toBe(targetCards.length);
+    expect(targetCards.map(({ position }) => position)).toEqual([...targetCards.map(({ position }) => position)].sort((a, b) => a - b));
+
+    const nearCards = [
+      await create(listA.body.id as string, 'Near one'),
+      await create(listA.body.id as string, 'Near two'),
+      await create(listA.body.id as string, 'Near three'),
+    ];
+    const nearIds = nearCards.map((response) => response.body.id as string);
+    await prisma.card.update({ where: { id: nearIds[0] }, data: { position: 10 } });
+    await prisma.card.update({ where: { id: nearIds[1] }, data: { position: 10.0000001 } });
+    const tinyGapMove = await request(app).post(`/api/v1/cards/${nearIds[2]}/move`).set(auth(member.token)).send({ toListId: listA.body.id, afterCardId: nearIds[0] });
+    expect(tinyGapMove.status).toBe(200);
+    const renumberedCards = await prisma.card.findMany({ where: { listId: listA.body.id as string }, orderBy: { position: 'asc' } });
+    expect(new Set(renumberedCards.map(({ position }) => position)).size).toBe(renumberedCards.length);
+    expect(renumberedCards.map(({ position }) => position)).toEqual([1024, 2048, 3072]);
+  });
+
+  it('TC-TASK-04: broadcasts committed board changes to members only', async () => {
+    const owner = await register('Realtime Owner');
+    const member = await register('Realtime Member');
+    const outsider = await register('Realtime Outsider');
+    const workspaceId = await createWorkspace(owner.token);
+    await prisma.membership.create({ data: { userId: member.id, workspaceId, role: 'MEMBER' } });
+    const httpServer = createServer(app);
+    const ioServer = initIo(httpServer);
+    await new Promise<void>((resolve) => httpServer.listen(0, resolve));
+    const address = httpServer.address();
+    if (!address || typeof address === 'string') throw new Error('Test server did not bind a TCP port');
+    const url = `http://127.0.0.1:${address.port}`;
+    const memberSocket = connectSocket(url, { auth: { token: member.token }, transports: ['websocket'] });
+    const outsiderSocket = connectSocket(url, { auth: { token: outsider.token }, transports: ['websocket'] });
+    const unauthorizedSocket = connectSocket(url, { auth: {}, transports: ['websocket'], reconnection: false });
+    const waitForConnect = (socket: typeof memberSocket) => new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('Socket connection timed out')), 1000);
+      socket.once('connect', () => { clearTimeout(timer); resolve(); });
+      socket.once('connect_error', (error: Error) => { clearTimeout(timer); reject(error); });
+    });
+    const waitForEvent = <T>(socket: typeof memberSocket, event: string) => new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`Timed out waiting for ${event}`)), 1000);
+      socket.once(event, (payload: T) => { clearTimeout(timer); resolve(payload); });
+    });
+    try {
+      await Promise.all([waitForConnect(memberSocket), waitForConnect(outsiderSocket)]);
+      await expect(waitForConnect(unauthorizedSocket)).rejects.toBeTruthy();
+      const joinMember = await new Promise<{ ok: boolean }>((resolve) => memberSocket.emit('workspace:join', { workspaceId }, resolve));
+      const joinOutsider = await new Promise<{ ok: boolean }>((resolve) => outsiderSocket.emit('workspace:join', { workspaceId }, resolve));
+      expect(joinMember.ok).toBe(true);
+      expect(joinOutsider.ok).toBe(false);
+      const outsiderEvents: string[] = [];
+      for (const event of ['board:card_created', 'board:card_updated', 'board:card_moved', 'board:card_deleted', 'board:list_changed']) {
+        outsiderSocket.on(event, () => outsiderEvents.push(event));
+      }
+
+      const listChanged = waitForEvent<{ lists: Array<{ id: string; name: string }> }>(memberSocket, 'board:list_changed');
+      const list = await request(app).post(`/api/v1/workspaces/${workspaceId}/lists`).set(auth(owner.token)).send({ name: 'Realtime' });
+      expect(list.status).toBe(201);
+      expect((await listChanged).lists.map(({ id }) => id)).toContain(list.body.id);
+      const updatedListChanged = waitForEvent<{ lists: Array<{ id: string; name: string }> }>(memberSocket, 'board:list_changed');
+      const renamed = await request(app).patch(`/api/v1/lists/${list.body.id as string}`).set(auth(owner.token)).send({ name: 'Renamed' });
+      expect(renamed.status).toBe(200);
+      expect((await updatedListChanged).lists.find(({ id }) => id === list.body.id)?.name).toBe('Renamed');
+
+      const cardCreatedEvent = waitForEvent<{ id: string; title: string }>(memberSocket, 'board:card_created');
+      const created = await request(app).post(`/api/v1/lists/${list.body.id as string}/cards`).set(auth(member.token)).send({ title: 'Realtime card' });
+      expect(created.status).toBe(201);
+      expect((await cardCreatedEvent).id).toBe(created.body.id);
+      const cardUpdatedEvent = waitForEvent<{ id: string; title: string }>(memberSocket, 'board:card_updated');
+      const updated = await request(app).patch(`/api/v1/cards/${created.body.id as string}`).set(auth(member.token)).send({ title: 'Updated realtime card' });
+      expect(updated.status).toBe(200);
+      expect((await cardUpdatedEvent).title).toBe('Updated realtime card');
+      const movedEvent = waitForEvent<{ cardId: string; fromListId: string; toListId: string; position: number }>(memberSocket, 'board:card_moved');
+      const secondListChanged = waitForEvent(memberSocket, 'board:list_changed');
+      const secondList = await request(app).post(`/api/v1/workspaces/${workspaceId}/lists`).set(auth(owner.token)).send({ name: 'Second' });
+      await secondListChanged;
+      const moved = await request(app).post(`/api/v1/cards/${created.body.id as string}/move`).set(auth(member.token)).send({ toListId: secondList.body.id });
+      expect(moved.status).toBe(200);
+      expect(await movedEvent).toMatchObject({ cardId: created.body.id, fromListId: list.body.id, toListId: secondList.body.id });
+      const deletedEvent = waitForEvent<{ cardId: string; listId: string }>(memberSocket, 'board:card_deleted');
+      const deleted = await request(app).delete(`/api/v1/cards/${created.body.id as string}`).set(auth(member.token));
+      expect(deleted.status).toBe(204);
+      expect(await deletedEvent).toEqual({ cardId: created.body.id, listId: secondList.body.id });
+      const failedWriteEvent = waitForEvent(memberSocket, 'board:card_updated').then(() => true, () => false);
+      const failedWrite = await request(app).patch(`/api/v1/cards/${created.body.id as string}`).set(auth(member.token)).send({ title: 'Must not emit' });
+      expect(failedWrite.status).toBe(404);
+      expect(await failedWriteEvent).toBe(false);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(outsiderEvents).toEqual([]);
+    } finally {
+      memberSocket.disconnect();
+      outsiderSocket.disconnect();
+      unauthorizedSocket.disconnect();
+      await new Promise<void>((resolve) => ioServer.close(() => resolve()));
+    }
   });
 });
 

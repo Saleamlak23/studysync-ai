@@ -2,6 +2,7 @@ import { createListBody, patchListBody, moveListBody } from '@studysync/shared';
 import { prisma } from '../../db/prisma.js';
 import { Errors } from '../../lib/errors.js';
 import { between, renumberPositions } from '../../lib/ordering.js';
+import { emitBoardListChanged } from './board.events.js';
 
 export async function getListWorkspaceId(listId: string) {
   const list = await prisma.list.findUnique({
@@ -14,7 +15,7 @@ export async function getListWorkspaceId(listId: string) {
 
 export async function createList(workspaceId: string, input: unknown) {
   const { name } = createListBody.parse(input);
-  return prisma.$transaction(async (tx) => {
+  const created = await prisma.$transaction(async (tx) => {
     const board = await tx.board.findUnique({ where: { workspaceId }, select: { id: true } });
     if (!board) throw Errors.notFound('Board');
     const lastList = await tx.list.findFirst({
@@ -26,18 +27,22 @@ export async function createList(workspaceId: string, input: unknown) {
       data: { boardId: board.id, name, position: between(lastList?.position ?? null, null)! },
     });
   });
+  await emitBoardListChanged(workspaceId);
+  return created;
 }
 
 export async function renameList(listId: string, input: unknown) {
   const { name } = patchListBody.parse(input);
-  const existing = await prisma.list.findUnique({ where: { id: listId }, select: { id: true } });
+  const existing = await prisma.list.findUnique({ where: { id: listId }, select: { board: { select: { workspaceId: true } } } });
   if (!existing) throw Errors.notFound('List');
-  return prisma.list.update({ where: { id: listId }, data: { name } });
+  const renamed = await prisma.list.update({ where: { id: listId }, data: { name } });
+  await emitBoardListChanged(existing.board.workspaceId);
+  return renamed;
 }
 
 export async function moveList(listId: string, input: unknown) {
   const { afterListId } = moveListBody.parse(input);
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const list = await tx.list.findUnique({ where: { id: listId }, select: { id: true, boardId: true } });
     if (!list) throw Errors.notFound('List');
 
@@ -68,10 +73,14 @@ export async function moveList(listId: string, input: unknown) {
 
     return tx.list.update({ where: { id: listId }, data: { position } });
   });
+  const workspaceId = await getListWorkspaceId(listId);
+  await emitBoardListChanged(workspaceId);
+  return result;
 }
 
 export async function deleteList(listId: string) {
-  const existing = await prisma.list.findUnique({ where: { id: listId }, select: { id: true } });
+  const existing = await prisma.list.findUnique({ where: { id: listId }, select: { board: { select: { workspaceId: true } } } });
   if (!existing) throw Errors.notFound('List');
   await prisma.list.delete({ where: { id: listId } });
+  await emitBoardListChanged(existing.board.workspaceId);
 }
