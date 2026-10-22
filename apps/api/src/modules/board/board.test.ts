@@ -296,3 +296,108 @@ describe('board lists and cards', () => {
     expect(ownerDelete.status).toBe(204);
   });
 });
+
+describe('board comments and labels', () => {
+  afterAll(async () => { await prisma.$disconnect(); });
+
+  it('TC-TASK-05: creates and lists comments and labels, validates access, and limits comment deletion', async () => {
+    const owner = await register('Comments Owner');
+    const author = await register('Comments Author');
+    const otherMember = await register('Comments Member');
+    const outsider = await register('Comments Outsider');
+    const workspaceId = await createWorkspace(owner.token);
+    await prisma.membership.createMany({
+      data: [
+        { userId: author.id, workspaceId, role: 'MEMBER' },
+        { userId: otherMember.id, workspaceId, role: 'MEMBER' },
+      ],
+    });
+    const list = await request(app)
+      .post(`/api/v1/workspaces/${workspaceId}/lists`)
+      .set(auth(owner.token))
+      .send({ name: 'Review' });
+    const card = await request(app)
+      .post(`/api/v1/lists/${list.body.id as string}/cards`)
+      .set(auth(author.token))
+      .send({ title: 'Review the draft' });
+    expect(list.status).toBe(201);
+    expect(card.status).toBe(201);
+
+    const noCommentAuth = await request(app).get(`/api/v1/cards/${card.body.id as string}/comments`);
+    expect(noCommentAuth.status).toBe(401);
+    const outsiderComments = await request(app)
+      .get(`/api/v1/cards/${card.body.id as string}/comments`)
+      .set(auth(outsider.token));
+    expect(outsiderComments.status).toBe(404);
+    const invalidComment = await request(app)
+      .post(`/api/v1/cards/${card.body.id as string}/comments`)
+      .set(auth(author.token))
+      .send({ body: '  ' });
+    expect(invalidComment.status).toBe(400);
+    const foreignMention = await request(app)
+      .post(`/api/v1/cards/${card.body.id as string}/comments`)
+      .set(auth(author.token))
+      .send({ body: 'Please review', mentionIds: [outsider.id] });
+    expect(foreignMention.status).toBe(400);
+
+    const first = await request(app)
+      .post(`/api/v1/cards/${card.body.id as string}/comments`)
+      .set(auth(author.token))
+      .send({ body: '  First note  ', mentionIds: [otherMember.id] });
+    const second = await request(app)
+      .post(`/api/v1/cards/${card.body.id as string}/comments`)
+      .set(auth(otherMember.token))
+      .send({ body: 'Second note' });
+    expect(first.status).toBe(201);
+    expect(first.body.body).toBe('First note');
+    expect(first.body.author.id).toBe(author.id);
+    expect(second.status).toBe(201);
+
+    const comments = await request(app)
+      .get(`/api/v1/cards/${card.body.id as string}/comments`)
+      .set(auth(author.token));
+    expect(comments.status).toBe(200);
+    expect(comments.body.map((item: { id: string }) => item.id)).toEqual([first.body.id, second.body.id]);
+
+    const otherMemberDelete = await request(app)
+      .delete(`/api/v1/comments/${first.body.id as string}`)
+      .set(auth(otherMember.token));
+    expect(otherMemberDelete.status).toBe(403);
+    const authorDelete = await request(app)
+      .delete(`/api/v1/comments/${first.body.id as string}`)
+      .set(auth(author.token));
+    expect(authorDelete.status).toBe(204);
+    const adminDelete = await request(app)
+      .delete(`/api/v1/comments/${second.body.id as string}`)
+      .set(auth(owner.token));
+    expect(adminDelete.status).toBe(204);
+
+    const noLabelAuth = await request(app).get(`/api/v1/workspaces/${workspaceId}/labels`);
+    expect(noLabelAuth.status).toBe(401);
+    const outsiderLabels = await request(app)
+      .get(`/api/v1/workspaces/${workspaceId}/labels`)
+      .set(auth(outsider.token));
+    expect(outsiderLabels.status).toBe(404);
+    const invalidLabel = await request(app)
+      .post(`/api/v1/workspaces/${workspaceId}/labels`)
+      .set(auth(author.token))
+      .send({ name: '  ', color: 'green' });
+    expect(invalidLabel.status).toBe(400);
+    const createdLabel = await request(app)
+      .post(`/api/v1/workspaces/${workspaceId}/labels`)
+      .set(auth(author.token))
+      .send({ name: '  Needs review  ', color: 'green' });
+    expect(createdLabel.status).toBe(201);
+    expect(createdLabel.body.name).toBe('Needs review');
+    const duplicateLabel = await request(app)
+      .post(`/api/v1/workspaces/${workspaceId}/labels`)
+      .set(auth(owner.token))
+      .send({ name: 'Needs review', color: 'red' });
+    expect(duplicateLabel.status).toBe(409);
+    const labels = await request(app)
+      .get(`/api/v1/workspaces/${workspaceId}/labels`)
+      .set(auth(otherMember.token));
+    expect(labels.status).toBe(200);
+    expect(labels.body.map((item: { id: string }) => item.id)).toContain(createdLabel.body.id);
+  });
+});

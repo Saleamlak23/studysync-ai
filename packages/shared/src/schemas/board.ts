@@ -21,6 +21,16 @@ export const createCardBody = z.object({
   labelIds: uniqueIds.optional(),
 });
 
+export const commentIdParams = z.object({ id });
+export const createCommentBody = z.object({
+  body: z.string().trim().min(1),
+  mentionIds: uniqueIds.optional(),
+});
+export const createLabelBody = z.object({
+  name: z.string().trim().min(1),
+  color: z.string().trim().min(1),
+});
+
 export const patchCardBody = z.object({
   title: z.string().trim().min(1).optional(),
   description: z.string().nullable().optional(),

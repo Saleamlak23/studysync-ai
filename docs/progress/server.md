@@ -52,14 +52,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S04 · Comments and labels
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/board-server-comments-labels`
 - Depends on: S03
 - Requirements: FR-TASK-05
 - Tests: TC-TASK-05
 - Read first: AGENTS.md 7, 9.4; docs/API.md section 4
 - Task: Card comments (list, create, delete) and workspace labels (list, create). Mentions create notifications later: leave a TODO.
-- Done in: (branch, date)
+- Done in: feature/board-server-comments-labels, 2026-10-22
 
 ### S05 · Card move and board real-time
 

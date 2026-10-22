@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import {
   cardIdParams,
+  commentIdParams,
+  createCommentBody,
   createCardBody,
+  createLabelBody,
   createListBody,
   listIdParams,
   moveListBody,
@@ -16,6 +19,8 @@ import { requireRole } from '../../middleware/requireRole.js';
 import { validate } from '../../middleware/validate.js';
 import { getBoard } from './board.service.js';
 import { createCard, deleteCard, getCard, getCardWorkspaceId, updateCard } from './cards.service.js';
+import { createComment, deleteComment, getCommentWorkspaceId, listCardComments } from './comments.service.js';
+import { createLabel, listWorkspaceLabels } from './labels.service.js';
 import { createList, deleteList, getListWorkspaceId, moveList, renameList } from './lists.service.js';
 
 export const boardRouter = Router();
@@ -57,4 +62,25 @@ boardRouter.patch('/cards/:id', validate({ params: cardIdParams, body: patchCard
 boardRouter.delete('/cards/:id', validate({ params: cardIdParams }), withWorkspace((req) => getCardWorkspaceId(req.params.id)), asyncHandler(async (req, res) => {
   await deleteCard(req.params.id, req.user!.id, req.membership!.role);
   res.status(204).end();
+}));
+
+boardRouter.get('/cards/:id/comments', validate({ params: cardIdParams }), withWorkspace((req) => getCardWorkspaceId(req.params.id)), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.json(await listCardComments(req.params.id));
+}));
+
+boardRouter.post('/cards/:id/comments', validate({ params: cardIdParams, body: createCommentBody }), withWorkspace((req) => getCardWorkspaceId(req.params.id)), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.status(201).json(await createComment(req.params.id, req.user!.id, req.membership!.workspaceId, req.body));
+}));
+
+boardRouter.delete('/comments/:id', validate({ params: commentIdParams }), withWorkspace((req) => getCommentWorkspaceId(req.params.id)), asyncHandler(async (req, res) => {
+  await deleteComment(req.params.id, req.user!.id, req.membership!.role);
+  res.status(204).end();
+}));
+
+boardRouter.get('/workspaces/:id/labels', validate({ params: workspaceIdParams }), loadMembership(), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.json(await listWorkspaceLabels(req.params.id));
+}));
+
+boardRouter.post('/workspaces/:id/labels', validate({ params: workspaceIdParams, body: createLabelBody }), loadMembership(), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.status(201).json(await createLabel(req.params.id, req.body));
 }));
