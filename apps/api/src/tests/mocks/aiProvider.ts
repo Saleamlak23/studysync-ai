@@ -6,6 +6,7 @@ export const aiProviderOutcomes = ['timeout', 'error'] as const;
 
 export class MockAIProvider implements AIProvider {
   calls = 0;
+  readonly prompts: string[] = [];
 
   constructor(
     readonly name: AIProviderName,
@@ -13,8 +14,9 @@ export class MockAIProvider implements AIProvider {
     private readonly response: AIProviderResult = { text: 'Mock response', tokensIn: 2, tokensOut: 3 },
   ) {}
 
-  async complete(_prompt: string, signal?: AbortSignal): Promise<AIProviderResult> {
+  async complete(prompt: string, signal?: AbortSignal): Promise<AIProviderResult> {
     this.calls += 1;
+    this.prompts.push(prompt);
     if (this.outcome === 'timeout') {
       await new Promise<void>((_resolve, reject) => {
         if (signal?.aborted) reject(signal.reason);

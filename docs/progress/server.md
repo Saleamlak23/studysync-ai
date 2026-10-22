@@ -129,14 +129,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S11 · AI features
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/ai-server-features`
 - Depends on: S10, S05, S08
 - Requirements: FR-AI-02, 03, 04, 08, 09
 - Tests: TC-AI-02, 03, 04, 08, 09
 - Read first: AGENTS.md 9.9; docs/SDD.md 6.4 and 13.4; docs/API.md section 8; docs/TEST-PLAN.md 5.6
 - Task: Ask, summarize (chat range, card, TXT, PDF, DOCX), breakdown preview and confirm (one transaction, events after commit), prompt-injection protection, clean failures.
-- Done in: (branch, date)
+- Done in: feature/ai-server-features, 2026-10-22
 
 ### S12 · Reminder and purge jobs
 

@@ -73,14 +73,14 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | FR-AI-01 | AI assistant panel in each workspace | 4, 7 | Web app panel calling /ai/\* | none | TC-AI-01 | Not started |
-| FR-AI-02 | Answer from user-selected context | 6.4 | POST /workspaces/:id/ai/ask | AIRequestLog | TC-AI-02 | Not started |
-| FR-AI-03 | Summarize chat, card or TXT, PDF, DOCX file | 6.4 | POST /workspaces/:id/ai/summarize | AIRequestLog, File | TC-AI-03 | Not started |
-| FR-AI-04 | Task breakdown: preview, confirm, create cards | 6.4 | POST /workspaces/:id/ai/breakdown and /breakdown/confirm | Card, AIRequestLog | TC-AI-04 | Not started |
+| FR-AI-02 | Answer from user-selected context | 6.4 | POST /workspaces/:id/ai/ask | AIRequestLog | TC-AI-02 | Passed — S11, `apps/api/src/modules/ai/ai.test.ts` |
+| FR-AI-03 | Summarize chat, card or TXT, PDF, DOCX file | 6.4 | POST /workspaces/:id/ai/summarize | AIRequestLog, File | TC-AI-03 | Passed — S11, `apps/api/src/modules/ai/ai.test.ts` |
+| FR-AI-04 | Task breakdown: preview, confirm, create cards | 6.4 | POST /workspaces/:id/ai/breakdown and /breakdown/confirm | Card, AIRequestLog | TC-AI-04 | Passed — S11, `apps/api/src/modules/ai/ai.test.ts`, `apps/api/src/modules/ai/ai.realtime.test.ts` |
 | FR-AI-05 | Provider timeout, retry and fallback | 6.4 | AI provider router (internal) | AIRequestLog.provider | TC-AI-05 | Not started |
 | FR-AI-06 | No content sent without owner consent | 6.4, 8 | All /ai/\* (403 AI\_DISABLED) | Workspace.aiEnabled | TC-AI-06 | Not started |
 | FR-AI-07 | Per-user and per-workspace limits, request log | 6.4 | All /ai/\* (429 AI\_LIMIT\_REACHED) | AIRequestLog | TC-AI-07 | Not started |
-| FR-AI-08 | Clear failure message, nothing partly created | 6.4 | 502 AI\_UNAVAILABLE, AI\_BAD\_OUTPUT | none | TC-AI-08 | Not started |
-| FR-AI-09 | Prompt-injection mitigation, confirm before changes | 6.4, 8 | Prompt builder and parser (internal) | none | TC-AI-09 | Not started |
+| FR-AI-08 | Clear failure message, nothing partly created | 6.4 | 502 AI\_UNAVAILABLE, AI\_BAD\_OUTPUT | none | TC-AI-08 | Passed — S11, `apps/api/src/modules/ai/ai.test.ts` |
+| FR-AI-09 | Prompt-injection mitigation, confirm before changes | 6.4, 8 | Prompt builder and parser (internal) | none | TC-AI-09 | Passed — S11, `apps/api/src/modules/ai/ai.test.ts` |
 
 ### 2.7 Search, Dashboard and Administration
 
