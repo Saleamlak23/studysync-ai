@@ -74,14 +74,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S06 · Personal dashboard data
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/profile-server-dashboard`
 - Depends on: S03
 - Requirements: FR-PROF-02, FR-ANA-02
 - Tests: TC-PROF-02
 - Read first: AGENTS.md 7, 8; docs/API.md section 2; docs/TEST-PLAN.md 5.1
 - Task: GET /me/dashboard: the user's assigned cards and upcoming deadlines across workspaces, soonest first.
-- Done in: (branch, date)
+- Done in: feature/profile-server-dashboard, 2026-10-22
 
 ### S07 · Channels and messages
 

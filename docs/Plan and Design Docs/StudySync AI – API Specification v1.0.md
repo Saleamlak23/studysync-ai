@@ -54,7 +54,7 @@ All errors return `{ "error": { "code": "...", "message": "...", "details": [...
 | POST /auth/logout | User | none | 204; revokes the refresh token and clears the cookie |
 | GET /me | User | none | 200 `{ user, workspaces: [Workspace] }` |
 | PATCH /me | User | name, bio, avatarUrl (any) | 200 User |
-| GET /me/dashboard | User | none | 200 `{ assignedCards[], upcomingDeadlines[] }` |
+| GET /me/dashboard | User | none | 200 `{ assignedCards: DashboardCard[], upcomingDeadlines: DashboardCard[] }`; cards assigned to the requester in their unarchived workspaces, with `list: { id, name }` and `workspace: { id, name }` context. `upcomingDeadlines` is the subset with a due date at or after request time, ordered soonest first; overdue and undated cards remain in `assignedCards` only. |
 
 ## 3. Workspaces
 

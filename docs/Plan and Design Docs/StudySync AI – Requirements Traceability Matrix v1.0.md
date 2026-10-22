@@ -24,7 +24,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | FR-AUTH-04 | Role checks on every route and socket event | 6.1 | All protected endpoints; workspace:join | Membership | TC-AUTH-04 | Partial — S00 tests unauthenticated profile access; full route and socket role matrix remains for S16 |
 | FR-AUTH-07 | Suspended users cannot log in and are disconnected | 6.1 | POST /auth/login; PATCH /admin/users/:id | User.status, RefreshToken | TC-AUTH-05 | Partial — S00 tests suspended login and refresh; admin suspension and socket disconnection remain for S15 |
 | FR-PROF-01 | Edit name, bio, avatar | 4 | GET and PATCH /me | User | TC-PROF-01 | Partial — S00 tests name and bio; avatar coverage remains |
-| FR-PROF-02 | Personal dashboard of cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 | Not started |
+| FR-PROF-02 | Personal dashboard of cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 | Implemented — TC-PROF-02 added; execution blocked because local PostgreSQL migration setup failed |
 
 ### 2.2 Workspaces
 
@@ -88,7 +88,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | --- | --- | --- | --- | --- | --- | --- |
 | FR-SRCH-01 | Full-text search within a workspace | 5.2 | GET /workspaces/:id/search | Card, Message, File | TC-SRCH-01 | Not started |
 | FR-ANA-01 | Workspace progress dashboard | 4 | GET /workspaces/:id/dashboard | Card, List | TC-ANA-01 | Not started |
-| FR-ANA-02 | Personal view of assigned cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 (shared) | Not started |
+| FR-ANA-02 | Personal view of assigned cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 (shared) | Implemented — TC-PROF-02 added; execution blocked because local PostgreSQL migration setup failed |
 | FR-ADM-01 | List, search, suspend and reactivate users | 4 | GET /admin/users; PATCH /admin/users/:id | User | TC-ADM-01 | Not started |
 | FR-ADM-02 | View AI usage and adjust limits | 4 | GET /admin/ai-usage; GET and PUT /admin/ai-limits | AIRequestLog, AppSetting | TC-ADM-02 | Not started |
 
