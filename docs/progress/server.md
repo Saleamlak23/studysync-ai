@@ -184,11 +184,11 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S16 Â· Hardening and security tests
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/hardening-server-security-tests`
 - Depends on: S01 to S15
 - Requirements: NFR-06, 07, 08, 09, 10, 13, 14
 - Tests: TC-NFR-06, 07, 08, 09, 10, 13, 14
 - Read first: AGENTS.md 12, 13; docs/TEST-PLAN.md section 6; docs/SRS.md section 5
 - Task: Check that every protected route has negative tests and fix gaps: rate limits on login and AI, headers, CORS, secret scan, 60% coverage on core modules, account deletion and AI history items in scope.
-- Done in: (branch, date)
+- Done in: feature/hardening-server-security-tests, 2026-10-22
