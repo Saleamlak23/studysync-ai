@@ -117,7 +117,7 @@ Allowed types: PDF, DOCX, TXT, PNG, JPG. Maximum size: 5 MB per file (5,242,880 
 | Method and path | Role | Request | Response and notes |
 | --- | --- | --- | --- |
 | POST /workspaces/:id/files | Member | multipart field `file` | 201 File; 413 if the file or the workspace storage cap is exceeded, 415 if the type is not allowed |
-| GET /workspaces/:id/files | Member | cursor? | 200 `[File]` newest first |
+| GET /workspaces/:id/files | Member | limit? (default 50, max 100), cursor? (file ID) | 200 `[File]` newest first; cursor returns files older than the cursor. Each item includes safe metadata and uploader, never bytes |
 | GET /files/:id | Member | none | 200 `file download`; the file bytes are streamed with Content-Type and Content-Disposition headers, only after a membership check |
 
 ## 7. Notifications

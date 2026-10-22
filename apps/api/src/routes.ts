@@ -18,7 +18,7 @@ apiRouter.use('/workspaces', workspacesRouter);
 apiRouter.use(invitesRouter);
 apiRouter.use(boardRouter);
 apiRouter.use(chatRouter);
-apiRouter.use('/workspaces', filesRouter);
+apiRouter.use(filesRouter);
 apiRouter.use('/notifications', notificationsRouter);
 apiRouter.use('/workspaces', aiRouter);
 apiRouter.use('/workspaces', searchRouter);

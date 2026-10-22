@@ -96,14 +96,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S08 · File storage
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/files-server-storage`
 - Depends on: S07
 - Requirements: FR-FILE-01, 02, 03; FR-CHAT-04
 - Tests: TC-FILE-01, 02, 03; TC-CHAT-04
 - Read first: AGENTS.md 9.8; docs/API.md section 6; docs/SDD.md 6.6; docs/TEST-PLAN.md 5.4
 - Task: Upload to PostgreSQL (FileBlob), type allowlist, 5 MB limit, workspace cap, list, streamed download after membership check, attach to a chat message.
-- Done in: (branch, date)
+- Done in: feature/files-server-storage, 2026-10-22
 
 ### S09 · Notifications
 
