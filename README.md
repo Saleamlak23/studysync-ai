@@ -116,6 +116,21 @@ docs/                  SRS, SDD, ERD, API specification, test plan, traceability
 
    The web app runs at http://localhost:5173 and the API at http://localhost:4000/api/v1.
 
+### Local email testing with Mailpit
+
+Run `mailpit.exe` in a separate PowerShell window from the folder where you downloaded it. Mailpit captures SMTP messages locally; view them at [http://localhost:8025](http://localhost:8025). Its default SMTP listener is `localhost:1025` and does not require authentication or TLS. See the [Mailpit SMTP documentation](https://mailpit.axllent.org/docs/configuration/smtp/) for its defaults.
+
+When an email sender is available, configure the API's `apps/api/.env` for Mailpit:
+
+```dotenv
+SMTP_HOST=127.0.0.1
+SMTP_PORT=1025
+SMTP_USER=
+SMTP_PASS=
+```
+
+Do not put real SMTP credentials in `.env.example`. The current API does not yet send email, so these settings are for local use when that feature is added; starting Mailpit alone will not cause the app to send messages.
+
 ## Environment variables
 
 Defined in `.env.example`. Never commit a real `.env` file.
@@ -130,7 +145,7 @@ Defined in `.env.example`. Never commit a real `.env` file.
 | `GROQ_API_KEY`, `GEMINI_API_KEY` | API | AI providers |
 | `AI_USER_DAILY_LIMIT`, `AI_WORKSPACE_DAILY_LIMIT` | API | Default AI limits; the System Admin can override them in the settings table |
 | `FILE_MAX_BYTES`, `WORKSPACE_STORAGE_CAP_BYTES` | API | Upload limits (5 MB per file, 100 MB per workspace by default) |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | API | Optional; only for email features |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | API | Optional; use `127.0.0.1:1025` with blank credentials for local Mailpit testing |
 | `VITE_API_URL` | Web | Base URL of the API |
 
 ## Scripts
