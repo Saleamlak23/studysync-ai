@@ -5,6 +5,7 @@ import { Errors } from '../../lib/errors.js';
 import { between, renumberPositions } from '../../lib/ordering.js';
 import { emitToBoard } from '../../realtime/emit.js';
 import { isIoInitialized } from '../../realtime/io.js';
+import { createNotifications, publishNotifications } from '../notifications/notifications.service.js';
 
 const cardRelations = {
   assignees: {
@@ -111,11 +112,16 @@ export async function updateCard(cardId: string, input: unknown) {
       data.labelIds,
     );
 
+    let notifications: Awaited<ReturnType<typeof createNotifications>> = [];
     if (data.assigneeIds) {
       const previousIds = new Set(existing.assignees.map(({ userId: id }) => id));
       const newlyAssignedIds = data.assigneeIds.filter((id) => !previousIds.has(id));
-      // TODO(S09): create assignment notifications for newly added assignees.
-      void newlyAssignedIds;
+      notifications = await createNotifications(tx, newlyAssignedIds.map((userId) => ({
+        userId,
+        workspaceId: existing.list.board.workspaceId,
+        type: 'ASSIGNED' as const,
+        payload: { cardId },
+      })));
       await tx.cardAssignee.deleteMany({ where: { cardId } });
       if (data.assigneeIds.length > 0) {
         await tx.cardAssignee.createMany({
@@ -140,9 +146,10 @@ export async function updateCard(cardId: string, input: unknown) {
       },
       include: cardRelations,
     });
-    return { card, workspaceId: existing.list.board.workspaceId };
+    return { card, workspaceId: existing.list.board.workspaceId, notifications };
   });
   if (isIoInitialized()) emitToBoard(result.workspaceId, 'board:card_updated', result.card);
+  publishNotifications(result.notifications);
   return result.card;
 }
 

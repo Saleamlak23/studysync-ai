@@ -1,6 +1,7 @@
 import { createCommentBody } from '@studysync/shared';
 import { prisma } from '../../db/prisma.js';
 import { Errors } from '../../lib/errors.js';
+import { createNotifications, publishNotifications } from '../notifications/notifications.service.js';
 
 export async function getCommentWorkspaceId(commentId: string) {
   const comment = await prisma.comment.findUnique({
@@ -23,20 +24,30 @@ export async function createComment(cardId: string, authorId: string, workspaceI
   const data = createCommentBody.parse(input);
   const mentionIds = data.mentionIds ?? [];
 
-  if (mentionIds.length > 0) {
-    const memberCount = await prisma.membership.count({
-      where: { workspaceId, userId: { in: mentionIds } },
-    });
-    if (memberCount !== mentionIds.length) {
-      throw Errors.validation({ field: 'mentionIds', message: 'Mentioned users must belong to the workspace' });
+  const result = await prisma.$transaction(async (tx) => {
+    if (mentionIds.length > 0) {
+      const memberCount = await tx.membership.count({
+        where: { workspaceId, userId: { in: mentionIds } },
+      });
+      if (memberCount !== mentionIds.length) {
+        throw Errors.validation({ field: 'mentionIds', message: 'Mentioned users must belong to the workspace' });
+      }
     }
-  }
 
-  // TODO(S09): create mention notifications for these workspace members.
-  return prisma.comment.create({
-    data: { cardId, authorId, body: data.body },
-    include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+    const comment = await tx.comment.create({
+      data: { cardId, authorId, body: data.body },
+      include: { author: { select: { id: true, name: true, avatarUrl: true } } },
+    });
+    const notifications = await createNotifications(tx, mentionIds.map((userId) => ({
+      userId,
+      workspaceId,
+      type: 'MENTION' as const,
+      payload: { cardId },
+    })));
+    return { comment, notifications };
   });
+  publishNotifications(result.notifications);
+  return result.comment;
 }
 
 export async function deleteComment(commentId: string, userId: string, role: 'OWNER' | 'ADMIN' | 'MEMBER') {

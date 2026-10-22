@@ -6,6 +6,7 @@ import { prisma } from '../../db/prisma.js';
 import { Errors } from '../../lib/errors.js';
 import { emitToChannel } from '../../realtime/emit.js';
 import { isIoInitialized } from '../../realtime/io.js';
+import { createNotifications, publishNotifications } from '../notifications/notifications.service.js';
 
 const messageRelations = {
   author: { select: { id: true, name: true, avatarUrl: true } },
@@ -113,10 +114,16 @@ export async function createMessage(channelId: string, userId: string, input: un
       data: { channelId, authorId: userId, content: data.content, fileId: data.fileId },
       include: messageRelations,
     });
-    // TODO(S09): create notifications for the validated mentionIds.
-    return serializeMessage(created);
+    const notifications = await createNotifications(tx, (data.mentionIds ?? []).map((userId) => ({
+      userId,
+      workspaceId: channel.workspaceId,
+      type: 'MENTION' as const,
+      payload: { channelId, messageId: created.id },
+    })));
+    return { message: serializeMessage(created), notifications };
   });
 
-  if (isIoInitialized()) emitToChannel(channelId, 'message:new', message satisfies MessageNewPayload);
-  return message;
+  if (isIoInitialized()) emitToChannel(channelId, 'message:new', message.message satisfies MessageNewPayload);
+  publishNotifications(message.notifications);
+  return message.message;
 }

@@ -107,14 +107,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S09 · Notifications
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/notifications-server-core`
 - Depends on: S04, S07
 - Requirements: FR-NOT-01, FR-NOT-02
 - Tests: TC-NOT-01, TC-NOT-02
 - Read first: AGENTS.md 7, 9.7; docs/API.md section 7; docs/TEST-PLAN.md 5.5
 - Task: List, mark read, mark all read, notification:new to the user room. Replace the TODOs for assignment and mention notifications in the board and chat modules.
-- Done in: (branch, date)
+- Done in: feature/notifications-server-core, 2026-10-22
 
 ### S10 · AI providers and limits
 
