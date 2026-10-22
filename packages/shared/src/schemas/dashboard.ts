@@ -30,3 +30,31 @@ export const personalDashboardSchema = z.object({
 
 export type DashboardCard = z.infer<typeof dashboardCardSchema>;
 export type PersonalDashboard = z.infer<typeof personalDashboardSchema>;
+
+// ---------------------------------------------------------------- workspace dashboard
+
+export const cardsPerListItemSchema = z.object({
+  listId: id,
+  name: z.string(),
+  position: z.number(),
+  count: z.number().int(),
+});
+
+export const contributionItemSchema = z.object({
+  userId: id,
+  name: z.string(),
+  avatarUrl: z.string().nullable(),
+  count: z.number().int(),
+});
+
+export const workspaceDashboardSchema = z.object({
+  cardsPerList: z.array(cardsPerListItemSchema),
+  overdue: z.number().int(),
+  completed: z.number().int(),
+  open: z.number().int(),
+  contributions: z.array(contributionItemSchema),
+});
+
+export type CardsPerListItem = z.infer<typeof cardsPerListItemSchema>;
+export type ContributionItem = z.infer<typeof contributionItemSchema>;
+export type WorkspaceDashboard = z.infer<typeof workspaceDashboardSchema>;
