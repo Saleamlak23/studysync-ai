@@ -151,14 +151,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### S13 · Search
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/search-server-fulltext`
 - Depends on: S07, S08
 - Requirements: FR-SRCH-01
 - Tests: TC-SRCH-01
 - Read first: AGENTS.md 9.11; docs/API.md section 9; docs/TEST-PLAN.md 5.7
 - Task: Workspace search over cards, messages and file names with snippets, membership enforced, query of 2+ characters.
-- Done in: (branch, date)
+- Done in: feature/search-server-fulltext, 2026-10-22
 
 ### S14 · Workspace dashboard data
 
