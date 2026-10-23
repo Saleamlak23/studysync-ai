@@ -20,7 +20,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B02 · Socket client and AI context store
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/shared-client-socket-ai-store`
 - Depends on: B01
 - Server tasks needed (use MSW mocks until done): S05
@@ -28,7 +28,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: unit tests for the store
 - Read first: AGENTS.md 7.3, 10.3, 10.7; docs/API.md section 11
 - Task: `shared/lib/socket.ts` (fresh token on every connect, reconnect listeners), useWorkspaceSocket, useOnReconnect, `shared/stores/aiContext.ts`.
-- Done in: (branch, date)
+- Done in: `feature/shared-client-socket-ai-store`, 2026-10-23
 
 ### B03 · Personal dashboard
 
