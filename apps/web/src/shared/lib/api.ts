@@ -5,12 +5,23 @@ const BASE = import.meta.env.VITE_API_URL ?? '/api/v1';
 let accessToken: string | null = null;
 let refreshInFlight: Promise<string | null> | null = null;
 const authFailureListeners = new Set<() => void>();
+const accessTokenListeners = new Set<(token: string | null, previousToken: string | null) => void>();
 
 export const setAccessToken = (token: string | null): void => {
+  const previousToken = accessToken;
+  if (previousToken === token) return;
   accessToken = token;
+  accessTokenListeners.forEach((listener) => listener(token, previousToken));
 };
 
 export const getAccessToken = (): string | null => accessToken;
+
+export const subscribeToAccessTokenChange = (
+  listener: (token: string | null, previousToken: string | null) => void,
+): (() => void) => {
+  accessTokenListeners.add(listener);
+  return () => accessTokenListeners.delete(listener);
+};
 
 export const subscribeToAuthFailure = (listener: () => void): (() => void) => {
   authFailureListeners.add(listener);
