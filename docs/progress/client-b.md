@@ -44,7 +44,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B04 · Notification bell and list
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/notifications-client-bell-list`
 - Depends on: B01
 - Server tasks needed (use MSW mocks until done): S09
@@ -52,7 +52,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests; manual check TC-NOT-02
 - Read first: AGENTS.md 10.5; docs/API.md section 7; wireframe 2
 - Task: NotificationBell with unread count and list panel, mark one or all read, loaded over REST (live updates in B07).
-- Done in: (branch, date)
+- Done in: `feature/notifications-client-bell-list`, 2026-10-23
 
 ### B05 · Chat
 
