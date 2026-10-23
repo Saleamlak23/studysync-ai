@@ -1,6 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Dialog } from './Dialog.js';
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('Dialog', () => {
   it('exposes dialog semantics when open', () => {
@@ -20,7 +24,11 @@ describe('Dialog', () => {
         <p>Form</p>
       </Dialog>,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    
+    // Scope the query inside the specific dialog to avoid matching multiple elements across tests
+    const dialog = screen.getByRole('dialog', { name: 'Invite member' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+    
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });
