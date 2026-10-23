@@ -8,7 +8,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B01 · API client and session
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/shared-client-api-session`
 - Depends on: S00
 - Server tasks needed (use MSW mocks until done): S00
@@ -16,7 +16,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: unit tests for refresh and retry logic
 - Read first: AGENTS.md 10.1, 10.2, 10.8, 10.9; docs/API.md sections 1 and 2
 - Task: `shared/lib/api.ts` (token in memory, single-flight refresh on 401 TOKEN_EXPIRED, one retry, ApiError), session handling and AuthProvider (restore on load), queryClient, errorMessages table, MSW setup with auth handlers.
-- Done in: (branch, date)
+- Done in: `feature/shared-client-api-session`, 2026-10-23
 
 ### B02 · Socket client and AI context store
 
