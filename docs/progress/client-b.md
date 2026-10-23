@@ -32,7 +32,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B03 · Personal dashboard
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/dashboard-client-personal`
 - Depends on: B01
 - Server tasks needed (use MSW mocks until done): S06, S01
@@ -40,7 +40,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests for states
 - Read first: AGENTS.md 5.1, 10.5; docs/API.md section 2; wireframe 2 (desktop and mobile)
 - Task: "/" page: assigned cards, upcoming deadlines, plus A04's WorkspaceList and CreateWorkspaceDialog (import through the workspaces index.ts; placeholders until A04 is done). Exports PersonalDashboard.
-- Done in: (branch, date)
+- Done in: `feature/dashboard-client-personal`, 2026-10-23
 
 ### B04 · Notification bell and list
 
