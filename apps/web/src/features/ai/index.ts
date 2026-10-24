@@ -1,3 +1,3 @@
 export { aiRoutes } from './routes.js';
-export function AiPanel() { return null; }
+export { AiPanel } from './AiPanel.js';
 export function BreakdownDialog() { return null; }

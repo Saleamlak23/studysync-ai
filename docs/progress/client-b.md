@@ -92,7 +92,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B08 · AI panel
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/ai-client-panel`
 - Depends on: B02
 - Server tasks needed (use MSW mocks until done): S10, S11
@@ -100,7 +100,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests for each error state
 - Read first: AGENTS.md 10.7, 10.9, 11.6; docs/API.md section 8; wireframe 3 (desktop and mobile)
 - Task: AiPanel (docked at xl, drawer at md, bottom sheet on mobile): selected context with clear button, consent notice, ask and summarize, errors for AI_DISABLED, AI_LIMIT_REACHED (with reset time) and AI_UNAVAILABLE.
-- Done in: (branch, date)
+- Done in: `feature/chat-client-channels-messages`, 2026-10-24
 
 ### B09 · AI breakdown dialog
 
