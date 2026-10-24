@@ -1,2 +1,2 @@
 export { chatRoutes } from './routes.js';
-export function ChatPage() { return null; }
+export { ChatPage } from './pages/ChatPage.js';

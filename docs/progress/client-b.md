@@ -56,7 +56,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B05 · Chat
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/chat-client-channels-messages`
 - Depends on: B02
 - Server tasks needed (use MSW mocks until done): S07
@@ -64,7 +64,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: unit test for catch-up and dedupe; manual check TC-CHAT-05
 - Read first: AGENTS.md 10.3, 10.5, 10.9; docs/API.md sections 5 and 11; wireframe 5 (desktop and mobile)
 - Task: Channel list (create and delete for Admin and Owner), message list, composer with mentions, reconnect banner, catch-up with ?after=lastId and dedupe by id, aria-live for new messages.
-- Done in: (branch, date)
+- Done in: `feature/chat-client-channels-messages`, 2026-10-24
 
 ### B06 · Files panel and upload
 
