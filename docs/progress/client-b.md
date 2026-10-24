@@ -116,7 +116,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B10 · Workspace dashboard
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/dashboard-client-workspace`
 - Depends on: B01
 - Server tasks needed (use MSW mocks until done): S14
@@ -124,7 +124,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component test with seeded data
 - Read first: AGENTS.md 10.5, 11; docs/API.md section 9
 - Task: /w/:id dashboard: cards per list, overdue, completed vs open, contribution per member, with Recharts and the tokens.
-- Done in: (branch, date)
+- Done in: `feature/chat-client-channels-messages`, 2026-10-24
 
 ### B11 · Admin pages
 
