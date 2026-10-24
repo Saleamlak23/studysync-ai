@@ -80,7 +80,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B07 · Live notifications
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/notifications-client-live`
 - Depends on: B04, B02
 - Server tasks needed (use MSW mocks until done): S09, S12
@@ -88,7 +88,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: unit test for the cache update
 - Read first: AGENTS.md 10.3; docs/API.md section 11
 - Task: Subscribe to notification:new, update bell count and list live, show DEADLINE reminders, recover after reconnect.
-- Done in: (branch, date)
+- Done in: `feature/chat-client-channels-messages`, 2026-10-24
 
 ### B08 · AI panel
 

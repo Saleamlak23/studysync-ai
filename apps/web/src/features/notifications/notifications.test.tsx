@@ -1,13 +1,35 @@
 import type { Notification } from '@studysync/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NotificationBell } from '@/features/notifications';
 
-const { apiMock } = vi.hoisted(() => ({ apiMock: vi.fn() }));
+const { apiMock, socketMock, emitSocketEvent, reconnectListeners } = vi.hoisted(() => {
+  const handlers = new Map<string, Set<(payload: unknown) => void>>();
+  const reconnectListeners = new Set<() => void>();
+  const socketMock = {
+    on: vi.fn((event: string, handler: (payload: unknown) => void) => {
+      const listeners = handlers.get(event) ?? new Set<(payload: unknown) => void>();
+      listeners.add(handler);
+      handlers.set(event, listeners);
+    }),
+    off: vi.fn((event: string, handler: (payload: unknown) => void) => handlers.get(event)?.delete(handler)),
+  };
+
+  return {
+    apiMock: vi.fn(),
+    socketMock,
+    emitSocketEvent: (event: string, payload: unknown) => handlers.get(event)?.forEach((handler) => handler(payload)),
+    reconnectListeners,
+  };
+});
 vi.mock('@/shared/lib/api.js', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/lib/api.js')>()),
   api: apiMock,
+}));
+vi.mock('@/shared/lib/socket.js', () => ({
+  getSocket: () => socketMock,
+  useOnReconnect: (listener: () => void) => reconnectListeners.add(listener),
 }));
 
 const notifications: Notification[] = [
@@ -17,12 +39,15 @@ const notifications: Notification[] = [
 
 function renderBell() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={queryClient}><NotificationBell /></QueryClientProvider>);
+  return { queryClient, ...render(<QueryClientProvider client={queryClient}><NotificationBell /></QueryClientProvider>) };
 }
 
 afterEach(() => {
   cleanup();
   apiMock.mockReset();
+  vi.mocked(socketMock.on).mockClear();
+  vi.mocked(socketMock.off).mockClear();
+  reconnectListeners.clear();
 });
 
 describe('NotificationBell (TC-NOT-02)', () => {
@@ -79,5 +104,36 @@ describe('NotificationBell (TC-NOT-02)', () => {
     expect(screen.getAllByText('Read')).toHaveLength(2);
     expect(apiMock).toHaveBeenCalledWith(`/notifications/${notifications[0].id}/read`, { method: 'POST' });
     expect(apiMock).toHaveBeenCalledWith('/notifications/read-all', { method: 'POST' });
+  });
+
+  it('TC-NOT-01: adds live notifications once and refreshes after reconnect', async () => {
+    const deadline: Notification = {
+      id: 'e31f551b-92d5-4c42-a667-f7a40205e41c',
+      type: 'DEADLINE',
+      workspaceId: notifications[0].workspaceId,
+      payload: { cardId: 'a6932161-9609-4ab7-95d4-1e9f4bfa59cc' },
+      readAt: null,
+      createdAt: '2026-10-24T10:00:00.000Z',
+    };
+    const initial = { notifications: [notifications[0]], nextCursor: null, unreadCount: 1 };
+    const recovered = { notifications: [deadline, notifications[0]], nextCursor: null, unreadCount: 2 };
+    apiMock.mockResolvedValueOnce(initial).mockResolvedValueOnce(recovered);
+
+    renderBell();
+    fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));
+    expect(await screen.findByText('1 unread')).toBeInTheDocument();
+
+    act(() => {
+      emitSocketEvent('notification:new', deadline);
+      emitSocketEvent('notification:new', deadline);
+    });
+    expect(await screen.findByText('2 unread')).toBeInTheDocument();
+    expect(screen.getByText('A card deadline is approaching.')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Mark as read' })).toHaveLength(2);
+
+    act(() => reconnectListeners.forEach((listener) => listener()));
+    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(2));
+    expect(screen.getByText('2 unread')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Mark as read' })).toHaveLength(2);
   });
 });

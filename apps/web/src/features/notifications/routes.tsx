@@ -1,10 +1,11 @@
-import type { Notification } from '@studysync/shared';
+import type { Notification, NotificationNewPayload } from '@studysync/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, CircleAlert } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createElement } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { ApiError, api } from '@/shared/lib/api.js';
+import { getSocket, useOnReconnect } from '@/shared/lib/socket.js';
 
 type NotificationsResponse = {
   notifications: Notification[];
@@ -13,12 +14,45 @@ type NotificationsResponse = {
 };
 
 const notificationsKey = ['notifications'] as const;
+const notificationPageSize = 50;
 
 function useNotifications() {
   return useQuery({
     queryKey: notificationsKey,
     queryFn: () => api<NotificationsResponse>('/notifications'),
   });
+}
+
+function useNotificationEvents() {
+  const queryClient = useQueryClient();
+  const onNotification = useCallback((notification: NotificationNewPayload) => {
+    const current = queryClient.getQueryData<NotificationsResponse>(notificationsKey);
+    if (!current) {
+      void queryClient.invalidateQueries({ queryKey: notificationsKey });
+      return;
+    }
+
+    const alreadyListed = current.notifications.some((item) => item.id === notification.id);
+    queryClient.setQueryData<NotificationsResponse>(notificationsKey, {
+      ...current,
+      notifications: alreadyListed
+        ? current.notifications.map((item) => item.id === notification.id ? notification : item)
+        : [notification, ...current.notifications].slice(0, notificationPageSize),
+      unreadCount: current.unreadCount + (!alreadyListed && notification.readAt === null ? 1 : 0),
+    });
+  }, [queryClient]);
+  const onReconnect = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: notificationsKey });
+  }, [queryClient]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    socket.on('notification:new', onNotification);
+    return () => {
+      socket.off('notification:new', onNotification);
+    };
+  }, [onNotification]);
+  useOnReconnect(onReconnect);
 }
 
 function useMarkNotificationRead() {
@@ -118,6 +152,7 @@ function NotificationsContent({ compact = false }: { compact?: boolean }) {
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  useNotificationEvents();
   const { data } = useNotifications();
   const unreadCount = data?.unreadCount ?? 0;
 
