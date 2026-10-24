@@ -68,7 +68,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B06 · Files panel and upload
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/files-client-panel-upload`
 - Depends on: B05
 - Server tasks needed (use MSW mocks until done): S08
@@ -76,7 +76,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests for error states
 - Read first: AGENTS.md 10.9; docs/API.md section 6; wireframe 5
 - Task: FilesPanel (list, upload, download), AttachButton for the chat composer, file chips in messages, messages for 413 and 415. The wireframe shows storage usage but the API has no field for it: do not invent one, ask.
-- Done in: (branch, date)
+- Done in: `feature/chat-client-channels-messages`, 2026-10-24
 
 ### B07 · Live notifications
 

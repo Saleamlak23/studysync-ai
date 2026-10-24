@@ -2,6 +2,7 @@ import type { Channel, Message, MessagesPage, WorkspaceRole } from '@studysync/s
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AttachButton, FileChip, FilesPanel, type AttachedFile } from '@/features/files';
 import { useWorkspaceSocket } from '@/shared/hooks/useWorkspaceSocket.js';
 import { ApiError } from '@/shared/lib/api.js';
 import { getSocket, useOnReconnect } from '@/shared/lib/socket.js';
@@ -138,22 +139,26 @@ function MessageItem({ message }: { message: Message }) {
       <time dateTime={message.createdAt} className="text-xs text-fg-faint">{time}</time>
     </div>
     <p className="whitespace-pre-wrap text-sm text-fg">{message.content}</p>
+    {message.file && <div className="mt-2 max-w-sm"><FileChip file={message.file} /></div>}
   </li>;
 }
 
 function MessageComposer({
   channel,
+  workspaceId,
   members,
   isSending,
   onSend,
 }: {
   channel: Channel;
+  workspaceId: string;
   members: ChatMember[];
   isSending: boolean;
-  onSend: (content: string, mentionIds: string[]) => void;
+  onSend: (content: string, mentionIds: string[], fileId?: string) => Promise<void>;
 }) {
   const [content, setContent] = useState('');
   const [mentions, setMentions] = useState<Array<{ id: string; token: string }>>([]);
+  const [attachment, setAttachment] = useState<AttachedFile | null>(null);
   const [caret, setCaret] = useState(0);
   const mentionMatch = content.slice(0, caret).match(/(?:^|\s)@([^\s@]*)$/);
   const suggestions = mentionMatch
@@ -170,13 +175,18 @@ function MessageComposer({
     setCaret(next.length);
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = content.trim();
     if (!trimmed || isSending) return;
-    onSend(trimmed, [...new Set(mentions.filter((item) => content.includes(item.token)).map((item) => item.id))]);
+    try {
+      await onSend(trimmed, [...new Set(mentions.filter((item) => content.includes(item.token)).map((item) => item.id))], attachment?.id);
+    } catch {
+      return;
+    }
     setContent('');
     setMentions([]);
+    setAttachment(null);
     setCaret(0);
   }
 
@@ -191,12 +201,17 @@ function MessageComposer({
   }
 
   return <form onSubmit={submit} className="relative flex items-end gap-2 border-t border-line bg-surface p-3 sm:p-4">
+    <AttachButton workspaceId={workspaceId} onUploaded={setAttachment} disabled={isSending || Boolean(attachment)} />
     <div className="min-w-0 flex-1">
       {suggestions.length > 0 && <ul aria-label="Mention suggestions" className="absolute bottom-full left-3 z-10 mb-2 max-h-48 w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-md border border-line bg-surface p-1 shadow-md">
         {suggestions.map((member) => <li key={member.user.id}><button type="button" className="min-h-11 w-full rounded px-3 text-left text-sm text-fg hover:bg-primary-soft" onClick={() => addMention(member)}>{member.user.name}</button></li>)}
       </ul>}
       <label htmlFor="chat-message" className="sr-only">Message #{channel.name}</label>
       <textarea id="chat-message" value={content} onChange={(event) => { setContent(event.target.value); setCaret(event.target.selectionStart); setMentions((current) => current.filter((item) => event.target.value.includes(item.token))); }} onClick={(event) => setCaret(event.currentTarget.selectionStart)} onKeyUp={(event) => setCaret(event.currentTarget.selectionStart)} onKeyDown={handleKeyDown} rows={2} maxLength={5000} placeholder={`Message #${channel.name}, use @ to mention`} className="min-h-11 max-h-36 w-full resize-y rounded-md border border-line bg-surface px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-faint focus-visible:ring-2 focus-visible:ring-focus" />
+      {attachment && <div className="mt-2 flex items-center gap-2 rounded-md bg-surface-muted p-2 text-sm text-fg">
+        <span className="min-w-0 flex-1 break-all">Attached: {attachment.name}</span>
+        <button type="button" disabled={isSending} onClick={() => setAttachment(null)} className="min-h-11 shrink-0 rounded-md px-2 font-medium text-primary hover:bg-primary-soft">Remove</button>
+      </div>}
       <p className="sr-only">Type @ followed by a name to mention a workspace member. Press Enter to send; Shift and Enter adds a line.</p>
     </div>
     <button type="submit" disabled={!content.trim() || isSending} className="min-h-11 shrink-0 rounded-md bg-primary px-4 text-sm font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
@@ -211,6 +226,7 @@ export function ChatPage() {
   const queryClient = useQueryClient();
   const [mutationMessage, setMutationMessage] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [filesOpen, setFilesOpen] = useState(false);
   const channelsQuery = useQuery({ queryKey: chatKeys.channels(workspaceId), queryFn: () => getChannels(workspaceId), enabled: Boolean(workspaceId) });
   const roleQuery = useQuery({ queryKey: chatKeys.workspace(workspaceId), queryFn: () => getWorkspaceRole(workspaceId), enabled: Boolean(workspaceId) });
   const membersQuery = useQuery({ queryKey: chatKeys.members(workspaceId), queryFn: () => getMembers(workspaceId), enabled: Boolean(workspaceId) });
@@ -257,7 +273,7 @@ export function ChatPage() {
     onError: (error) => setMutationMessage(friendlyError(error, 'The channel could not be deleted. Try again.')),
   });
   const sendMutation = useMutation({
-    mutationFn: ({ content, mentionIds }: { content: string; mentionIds: string[] }) => postMessage(activeChannel!.id, content, mentionIds),
+    mutationFn: ({ content, mentionIds, fileId }: { content: string; mentionIds: string[]; fileId?: string }) => postMessage(activeChannel!.id, content, mentionIds, fileId),
     onSuccess: (message) => {
       setMutationMessage(null);
       queryClient.setQueryData<MessagesPage>(chatKeys.messages(message.channelId), (current) => current
@@ -301,14 +317,16 @@ export function ChatPage() {
     {!channelsQuery.isPending && !channelsQuery.isError && <>
       <ChannelList channels={channels} selectedId={activeChannel?.id} canManage={canManage} isCreating={createMutation.isPending} onSelect={selectChannel} onCreate={createFromForm} />
       {mutationMessage && <div role="alert" className="flex items-start justify-between gap-3 rounded-md border border-danger bg-danger-bg p-3 text-sm text-fg"><p>{mutationMessage}</p><button type="button" aria-label="Dismiss message" onClick={() => setMutationMessage(null)} className="min-h-11 px-2 font-semibold">Dismiss</button></div>}
+      <div className="flex min-h-0 flex-1 gap-3">
       {!activeChannel ? <section aria-label="Chat messages" className="flex min-h-48 flex-1 items-center justify-center rounded-lg border border-line bg-surface p-6 text-center">
         <div><h2 className="font-semibold text-fg">No channels yet</h2><p className="mt-2 text-sm text-fg-muted">{canManage ? 'Create a channel to start the conversation.' : 'An administrator can create a channel for this workspace.'}</p></div>
-      </section> : <section aria-label={`Chat in ${activeChannel.name}`} className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
+      </section> : <section aria-label={`Chat in ${activeChannel.name}`} className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
         {connectionState !== 'connected' && <div role="status" className="border-b border-warning bg-warning-bg px-4 py-2 text-sm text-fg">
           {connectionState === 'disconnected' ? 'Reconnecting. Missed messages will load automatically.' : 'Connecting to chat…'}
         </div>}
         <header className="flex flex-wrap items-center gap-3 border-b border-line p-3 sm:p-4">
           <div className="min-w-0 flex-1"><h2 className="truncate text-lg font-semibold text-fg"><span aria-hidden="true"># </span>{activeChannel.name}</h2><p className="text-xs text-fg-muted">Workspace channel</p></div>
+          <button type="button" aria-expanded={filesOpen} aria-controls="workspace-files-panel" onClick={() => setFilesOpen((open) => !open)} className="min-h-11 shrink-0 rounded-md border border-line bg-surface px-3 text-sm font-medium text-fg hover:bg-surface-muted">{filesOpen ? 'Hide files' : 'Files'}</button>
           {channels.length > 0 && <label className="sr-only" htmlFor="mobile-channel-select">Choose channel</label>}
           {channels.length > 1 && <select id="mobile-channel-select" value={activeChannel.id} onChange={(event) => { const next = channels.find((channel) => channel.id === event.target.value); if (next) selectChannel(next); }} className="min-h-11 max-w-full rounded-md border border-line bg-surface px-3 text-sm text-fg md:hidden">
             {channels.map((channel) => <option key={channel.id} value={channel.id}># {channel.name}</option>)}
@@ -332,8 +350,13 @@ export function ChatPage() {
           </> : null}
         </div>
         {membersQuery.isError && <p role="status" className="mx-3 mb-2 text-xs text-fg-muted">Member suggestions are unavailable. You can still send a message.</p>}
-        <MessageComposer channel={activeChannel} members={membersQuery.data ?? []} isSending={sendMutation.isPending} onSend={(content, mentionIds) => { setMutationMessage(null); sendMutation.mutate({ content, mentionIds }); }} />
+        <MessageComposer workspaceId={workspaceId} channel={activeChannel} members={membersQuery.data ?? []} isSending={sendMutation.isPending} onSend={async (content, mentionIds, fileId) => { setMutationMessage(null); await sendMutation.mutateAsync({ content, mentionIds, fileId }); }} />
       </section>}
+      {activeChannel && filesOpen && <div id="workspace-files-panel" className="hidden min-h-0 w-72 shrink-0 xl:block"><FilesPanel workspaceId={workspaceId} onClose={() => setFilesOpen(false)} /></div>}
+      {activeChannel && filesOpen && <div className="fixed inset-0 z-40 bg-fg/40 p-3 xl:hidden">
+        <div role="dialog" aria-modal="true" aria-label="Files in this workspace" className="ml-auto h-full w-full max-w-sm"><FilesPanel workspaceId={workspaceId} onClose={() => setFilesOpen(false)} /></div>
+      </div>}
+      </div>
     </>}
   </main>;
 }

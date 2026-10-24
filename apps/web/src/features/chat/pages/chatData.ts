@@ -38,9 +38,13 @@ export function deleteChannel(channelId: string): Promise<void> {
   return api<void>(`/channels/${encodeURIComponent(channelId)}`, { method: 'DELETE' });
 }
 
-export function postMessage(channelId: string, content: string, mentionIds: string[]): Promise<Message> {
+export function postMessage(channelId: string, content: string, mentionIds: string[], fileId?: string): Promise<Message> {
   return api<Message>(`/channels/${encodeURIComponent(channelId)}/messages`, {
     method: 'POST',
-    body: { content, ...(mentionIds.length ? { mentionIds } : {}) },
+    body: {
+      content,
+      ...(fileId ? { fileId } : {}),
+      ...(mentionIds.length ? { mentionIds } : {}),
+    },
   });
 }

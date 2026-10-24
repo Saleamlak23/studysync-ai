@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, api, getAccessToken, setAccessToken, subscribeToAuthFailure } from './api.js';
+import { ApiError, api, apiBlob, getAccessToken, setAccessToken, subscribeToAuthFailure } from './api.js';
 import { getErrorMessage } from './errorMessages.js';
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -91,5 +91,21 @@ describe('api client', () => {
     expect(getErrorMessage('AI_LIMIT_REACHED', { resetAt: '2026-10-22T12:00:00.000Z' })).toContain(
       'Daily AI limit reached. It resets at ',
     );
+  });
+
+  it('TC-FILE-02: refreshes an expired session before downloading a file blob', async () => {
+    const fetchMock = vi.mocked(fetch);
+    const fileResponse = new Response(new Blob(['file bytes']), { status: 200, headers: { 'Content-Type': 'application/pdf' } });
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ error: { code: 'TOKEN_EXPIRED' } }, 401))
+      .mockResolvedValueOnce(jsonResponse({ accessToken: 'fresh-token' }))
+      .mockResolvedValueOnce(fileResponse);
+
+    const blob = await apiBlob('/files/file-1');
+
+    expect(blob.size).toBeGreaterThan(0);
+    expect(blob.type).toBe('application/pdf');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).get('Authorization')).toBe('Bearer fresh-token');
   });
 });

@@ -124,6 +124,30 @@ async function send<T>(path: string, init: ApiInit, token: string | null): Promi
   return (await response.json()) as T;
 }
 
+async function sendBlob(path: string, init: ApiInit, token: string | null): Promise<Blob> {
+  const headers = new Headers(init.headers);
+  const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData;
+  if (init.body !== undefined && !isFormData && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  const response = await fetch(requestUrl(path, init.query), {
+    ...init,
+    headers,
+    credentials: init.credentials ?? 'include',
+    body:
+      init.body === undefined
+        ? undefined
+        : isFormData || typeof init.body === 'string'
+          ? (init.body as BodyInit)
+          : JSON.stringify(init.body),
+  });
+
+  if (!response.ok) throw await readError(response);
+  return response.blob();
+}
+
 export async function api<T = unknown>(path: string, init: ApiInit = {}): Promise<T> {
   const tokenUsed = accessToken;
   try {
@@ -148,6 +172,41 @@ export async function api<T = unknown>(path: string, init: ApiInit = {}): Promis
 
     try {
       return await send<T>(path, init, token);
+    } catch (retryError) {
+      if (
+        retryError instanceof ApiError &&
+        (retryError.code === 'UNAUTHENTICATED' || retryError.code === 'TOKEN_EXPIRED')
+      ) {
+        notifyAuthFailure();
+      }
+      throw retryError;
+    }
+  }
+}
+
+export async function apiBlob(path: string, init: ApiInit = {}): Promise<Blob> {
+  const tokenUsed = accessToken;
+  try {
+    return await sendBlob(path, init, tokenUsed);
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
+    if (error.code === 'UNAUTHENTICATED') notifyAuthFailure();
+    if (
+      error.status !== 401 ||
+      error.code !== 'TOKEN_EXPIRED' ||
+      path.startsWith('/auth/')
+    ) {
+      throw error;
+    }
+
+    const token = accessToken !== tokenUsed ? accessToken : await refreshAccessToken();
+    if (!token) {
+      notifyAuthFailure();
+      throw error;
+    }
+
+    try {
+      return await sendBlob(path, init, token);
     } catch (retryError) {
       if (
         retryError instanceof ApiError &&
