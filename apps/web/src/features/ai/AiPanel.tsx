@@ -5,6 +5,7 @@ import { useAiContext, type AiContextItem } from '@/shared/stores/aiContext.js';
 import { ApiError } from '@/shared/lib/api.js';
 import { useAskAi, useSummarizeAi, useWorkspaceAiState } from './api/hooks.js';
 import type { AiContextPayload } from './api/ai.api.js';
+import { BreakdownDialog } from './BreakdownDialog.js';
 
 type AiResult =
   | { kind: 'answer'; text: string; provider: string }
@@ -47,6 +48,7 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
   const [question, setQuestion] = useState('');
   const [result, setResult] = useState<AiResult | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const requestPending = ask.isPending || summarize.isPending;
   const canUseAi = workspace.data?.aiEnabled === true;
   const workspaceStateLoading = Boolean(workspaceId) && workspace.isPending;
@@ -118,6 +120,9 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
     <button type="button" onClick={summarizeSelection} disabled={!workspaceId || !canUseAi || items.length !== 1 || requestPending} className="min-h-11 w-full rounded-md border border-ai-soft-line bg-ai-soft px-3 text-sm font-semibold text-ai hover:bg-ai-soft disabled:cursor-not-allowed disabled:opacity-50">
       {summarize.isPending ? 'Summarizing…' : 'Summarize selected item'}
     </button>
+    <button type="button" onClick={() => setIsBreakdownOpen(true)} disabled={!workspaceId || !canUseAi || requestPending} className="min-h-11 w-full rounded-md border border-ai-soft-line bg-ai-soft px-3 text-sm font-semibold text-ai hover:bg-ai-soft disabled:cursor-not-allowed disabled:opacity-50">
+      Break down a project
+    </button>
     {items.length > 1 && <p className="-mt-3 text-xs text-fg-muted">Select one item at a time to summarize.</p>}
 
     <form onSubmit={submitQuestion} className="flex flex-col gap-2">
@@ -137,6 +142,7 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
   </section>;
 
   return <>
+    {isBreakdownOpen && workspaceId && <BreakdownDialog workspaceId={workspaceId} onClose={() => setIsBreakdownOpen(false)} />}
     <aside className="hidden h-full w-[var(--size-ai-panel)] shrink-0 xl:flex">{panel}</aside>
     <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen(true)} className="fixed bottom-[calc(var(--size-bottom-nav)+1rem)] right-4 z-30 min-h-11 rounded-full bg-ai px-4 text-sm font-semibold text-white shadow-md hover:bg-ai-hover xl:hidden">AI assistant</button>
     {isOpen && <div className="fixed inset-0 z-40 flex items-end bg-fg/40 p-3 md:items-stretch md:justify-end xl:hidden">

@@ -104,7 +104,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B09 · AI breakdown dialog
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/ai-client-breakdown-dialog`
 - Depends on: B08
 - Server tasks needed (use MSW mocks until done): S11
@@ -112,7 +112,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests
 - Read first: AGENTS.md 10.9; docs/API.md section 8; docs/SDD.md 13.4; wireframe 4 (desktop and mobile)
 - Task: BreakdownDialog: description and target list, generate preview, editable rows, the text "Nothing is created until you confirm.", confirm creates cards through the confirm endpoint, failure leaves nothing changed.
-- Done in: (branch, date)
+- Done in: `feature/chat-client-channels-messages`, 2026-10-24
 
 ### B10 · Workspace dashboard
 
