@@ -8,14 +8,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A01 · Design-system primitives
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/ui-client-design-primitives`
 - Depends on: S00
 - Requirements: NFR-12
 - Tests: component tests; accessibility checks
 - Read first: AGENTS.md 4.2, 11, 12; all wireframes in docs/wireframes
 - Task: Button, Input, Card, Badge, Spinner, Skeleton, EmptyState, Dialog, Sheet, Toast, Avatar in `shared/ui`. Confirm `styles/tokens.css` matches AGENTS.md 11.1.
-- Done in: (branch, date)
+- Done in: (feature/ui-client-design-primitives, [18/10/2026])
 
 ### A02 · App shell and router
 
@@ -134,4 +134,3 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Read first: AGENTS.md 10.9, 11.7; docs/TEST-PLAN.md section 6; all wireframes
 - Task: 360 px pass on every screen of my features, keyboard and screen-reader checks, route-level code splitting, consistent loading, empty and error states.
 - Done in: (branch, date)
-
