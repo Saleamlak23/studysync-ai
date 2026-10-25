@@ -6,6 +6,7 @@ import {
   useBoard,
   useCreateBoardList,
   useDeleteBoardList,
+  useMoveBoardCard,
   useMoveBoardList,
   useRenameBoardList,
 } from './board.api.js';
@@ -16,6 +17,7 @@ vi.mock('./board.api.js', () => ({
   useCreateBoardList: vi.fn(),
   useRenameBoardList: vi.fn(),
   useDeleteBoardList: vi.fn(),
+  useMoveBoardCard: vi.fn(),
   useMoveBoardList: vi.fn(),
 }));
 
@@ -23,9 +25,12 @@ vi.mock('@/features/workspaces', () => ({
   useWorkspace: vi.fn(),
   useMyRole: vi.fn(),
 }));
+vi.mock('./useBoardSocket.js', () => ({ useBoardSocket: vi.fn() }));
 
 const card = {
   id: 'card-1',
+  listId: 'list-1',
+  position: 1024,
   title: 'Prepare study plan',
   priority: 'HIGH' as const,
   assignees: [{ userId: 'user-1', user: { id: 'user-1', name: 'Rufta Gaiem', email: 'rufta@example.com', avatarUrl: null } }],
@@ -43,6 +48,7 @@ const createMutation = vi.fn();
 const renameMutation = vi.fn();
 const deleteMutation = vi.fn();
 const moveMutation = vi.fn();
+const moveCardMutation = vi.fn();
 const boardRefetch = vi.fn();
 const workspaceRefetch = vi.fn();
 
@@ -90,6 +96,7 @@ describe('BoardPage', () => {
     vi.mocked(useRenameBoardList).mockReturnValue({ mutateAsync: renameMutation, isPending: false } as unknown as ReturnType<typeof useRenameBoardList>);
     vi.mocked(useDeleteBoardList).mockReturnValue({ mutateAsync: deleteMutation, isPending: false } as unknown as ReturnType<typeof useDeleteBoardList>);
     vi.mocked(useMoveBoardList).mockReturnValue({ mutateAsync: moveMutation, isPending: false } as unknown as ReturnType<typeof useMoveBoardList>);
+    vi.mocked(useMoveBoardCard).mockReturnValue({ mutate: moveCardMutation, isPending: false } as unknown as ReturnType<typeof useMoveBoardCard>);
   });
 
   afterEach(cleanup);
@@ -180,5 +187,26 @@ describe('BoardPage', () => {
     expect(panel).toHaveAttribute('aria-labelledby', 'board-tab-list-2');
     expect(within(panel).getByRole('heading', { name: 'In progress' })).toBeInTheDocument();
     expect(within(panel).getByText('No cards in this list yet.')).toBeInTheDocument();
+  });
+
+  it('TC-TASK-03: provides a keyboard and mobile move menu that appends after the last card', () => {
+    const destinationCard = { ...card, id: 'card-destination', listId: 'list-2', position: 1024, title: 'Existing destination card' };
+    const boardWithDestinationCard = {
+      ...board,
+      lists: [board.lists[0]!, { ...board.lists[1]!, cards: [destinationCard] }, board.lists[2]!],
+    };
+    setBoardState({ data: boardWithDestinationCard });
+    renderBoard();
+
+    expect(screen.getAllByRole('button', { name: 'Drag Prepare study plan' })).toHaveLength(2);
+    const moveMenu = screen.getAllByLabelText('Move Prepare study plan to list')[0]!;
+    moveMenu.focus();
+    fireEvent.change(moveMenu, { target: { value: 'list-2' } });
+
+    expect(moveCardMutation).toHaveBeenCalledWith({
+      cardId: 'card-1',
+      toListId: 'list-2',
+      afterCardId: 'card-destination',
+    }, expect.objectContaining({ onError: expect.any(Function) }));
   });
 });

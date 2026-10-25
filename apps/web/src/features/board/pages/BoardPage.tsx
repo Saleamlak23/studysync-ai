@@ -1,4 +1,17 @@
 import { useEffect, useState } from 'react';
+import {
+  closestCorners,
+  DndContext,
+  PointerSensor,
+  pointerWithin,
+  KeyboardSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type CollisionDetection,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useParams } from 'react-router-dom';
 import { useMyRole, useWorkspace } from '@/features/workspaces';
 import { ApiError } from '@/shared/lib/api.js';
@@ -9,10 +22,21 @@ import {
   useBoard,
   useCreateBoardList,
   useDeleteBoardList,
+  useMoveBoardCard,
   useMoveBoardList,
   useRenameBoardList,
 } from './board.api.js';
+import { afterCardId } from './board.api.js';
 import type { BoardList } from './board.api.js';
+import { useBoardSocket } from './useBoardSocket.js';
+
+const boardCollisionDetection: CollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args);
+  const cardCollisions = pointerCollisions.filter((collision) =>
+    args.droppableContainers.find((container) => container.id === collision.id)?.data.current?.type === 'card',
+  );
+  return cardCollisions.length > 0 ? cardCollisions : pointerCollisions.length > 0 ? pointerCollisions : closestCorners(args);
+};
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof ApiError ? error.message : fallback;
@@ -28,6 +52,8 @@ export function BoardPage() {
   const renameList = useRenameBoardList(workspaceId);
   const deleteList = useDeleteBoardList(workspaceId);
   const moveList = useMoveBoardList(workspaceId);
+  const moveCardMutation = useMoveBoardCard(workspaceId);
+  useBoardSocket(workspaceId);
   const lists = boardQuery.data?.lists ?? [];
   const canManageLists = role === 'OWNER' || role === 'ADMIN';
   const [selectedListId, setSelectedListId] = useState('');
@@ -35,6 +61,11 @@ export function BoardPage() {
   const [listToEdit, setListToEdit] = useState<BoardList | null>(null);
   const [listToDelete, setListToDelete] = useState<BoardList | null>(null);
   const [actionError, setActionError] = useState('');
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   useEffect(() => {
     if (lists.length > 0 && !lists.some((list) => list.id === selectedListId)) {
@@ -76,6 +107,32 @@ export function BoardPage() {
     }
   }
 
+  function requestCardMove(cardId: string, toListId: string, afterId: string | null) {
+    setActionError('');
+    moveCardMutation.mutate({ cardId, toListId, afterCardId: afterId }, {
+      onError: (error) => setActionError(errorMessage(error, 'We could not move this card. Try again.')),
+    });
+  }
+
+  function handleDragEnd({ active, over }: DragEndEvent) {
+    if (!over) return;
+    const activeData = active.data.current as { type?: string; cardId?: string } | undefined;
+    const overData = over.data.current as { type?: string; cardId?: string; listId?: string } | undefined;
+    if (activeData?.type !== 'card' || !activeData.cardId || !overData?.listId) return;
+    if (overData.cardId === activeData.cardId) return;
+    const targetList = lists.find((list) => list.id === overData.listId);
+    if (!targetList) return;
+
+    const targetCards = targetList.cards.filter((card) => card.id !== activeData.cardId);
+    const overCardId = overData.type === 'card' ? overData.cardId ?? null : null;
+    const draggedCenter = active.rect.current.translated
+      ? active.rect.current.translated.top + active.rect.current.translated.height / 2
+      : null;
+    const overCenter = over.rect.top + over.rect.height / 2;
+    const insertAfter = draggedCenter !== null && draggedCenter > overCenter;
+    requestCardMove(activeData.cardId, targetList.id, afterCardId(targetCards, overCardId, insertAfter));
+  }
+
   const retry = () => {
     void Promise.all([boardQuery.refetch(), workspaceQuery.refetch()]);
   };
@@ -110,6 +167,7 @@ export function BoardPage() {
   const selectedList = lists.find((list) => list.id === selectedListId) ?? lists[0];
 
   return (
+    <DndContext sensors={sensors} collisionDetection={boardCollisionDetection} onDragEnd={handleDragEnd}>
     <main className="min-w-0 space-y-6 p-4 text-fg sm:p-6">
       <header className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -161,9 +219,11 @@ export function BoardPage() {
                   listCount={lists.length}
                   isMoving={moveList.isPending}
                   idPrefix="mobile"
+                  lists={lists}
                   onRename={(list) => { setListToEdit(list); setListDialogOpen(true); }}
                   onDelete={setListToDelete}
                   onMove={(list, direction) => void reorderList(list, direction)}
+                  onMoveCard={requestCardMove}
                 />
               </div>
             )}
@@ -179,9 +239,11 @@ export function BoardPage() {
                 listCount={lists.length}
                 isMoving={moveList.isPending}
                 idPrefix="desktop"
+                lists={lists}
                 onRename={(item) => { setListToEdit(item); setListDialogOpen(true); }}
                 onDelete={setListToDelete}
                 onMove={(item, direction) => void reorderList(item, direction)}
+                onMoveCard={requestCardMove}
               />
             ))}
           </div>
@@ -207,5 +269,6 @@ export function BoardPage() {
         </div>
       </Dialog>
     </main>
+    </DndContext>
   );
 }

@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Priority } from '@studysync/shared';
-import { createListBody, moveListBody, patchListBody } from '@studysync/shared';
+import { createListBody, moveCardBody, moveListBody, patchListBody } from '@studysync/shared';
 import { api } from '@/shared/lib/api.js';
 
 export type BoardCard = {
   id: string;
+  listId: string;
+  position: number;
   title: string;
   priority: Priority;
   assignees: Array<{ userId: string; user: { id: string; name: string; email: string; avatarUrl: string | null } }>;
@@ -16,6 +18,8 @@ export type BoardData = {
   board: { id: string; workspaceId: string; name: string };
   lists: BoardList[];
 };
+
+export type MoveCardInput = { cardId: string; toListId: string; afterCardId: string | null };
 
 export const boardKeys = {
   detail: (workspaceId: string) => ['board', workspaceId] as const,
@@ -68,4 +72,105 @@ export function useMoveBoardList(workspaceId: string) {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: boardKeys.detail(workspaceId) }),
   });
+}
+
+export function useMoveBoardCard(workspaceId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = boardKeys.detail(workspaceId);
+
+  return useMutation({
+    mutationFn: ({ cardId, toListId, afterCardId }: MoveCardInput) => {
+      const body = moveCardBody.parse({ toListId, ...(afterCardId ? { afterCardId } : {}) });
+      return api<BoardCard>(`/cards/${cardId}/move`, { method: 'POST', body });
+    },
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<BoardData>(queryKey);
+      queryClient.setQueryData<BoardData>(queryKey, (current) => current && moveCardLocally(current, input));
+      return { previous };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+    },
+    onSuccess: (card) => {
+      queryClient.setQueryData<BoardData>(queryKey, (current) => current && applyCardUpserted(current, card));
+      void queryClient.invalidateQueries({ queryKey });
+    },
+  });
+}
+
+export function afterCardId(
+  cards: BoardCard[],
+  overCardId: string | null,
+  insertAfter = false,
+): string | null {
+  if (overCardId === null) return cards.at(-1)?.id ?? null;
+  const targetIndex = cards.findIndex((card) => card.id === overCardId);
+  if (targetIndex < 0) return cards.at(-1)?.id ?? null;
+  if (insertAfter) return overCardId;
+  return cards[targetIndex - 1]?.id ?? null;
+}
+
+export function moveCardLocally(board: BoardData, input: MoveCardInput): BoardData {
+  const sourceList = board.lists.find((list) => list.cards.some((card) => card.id === input.cardId));
+  const targetList = board.lists.find((list) => list.id === input.toListId);
+  if (!sourceList || !targetList) return board;
+
+  const card = sourceList.cards.find((item) => item.id === input.cardId);
+  if (!card) return board;
+  const listsWithoutCard = board.lists.map((list) => ({
+    ...list,
+    cards: list.cards.filter((item) => item.id !== input.cardId),
+  }));
+  const nextTarget = listsWithoutCard.find((list) => list.id === input.toListId);
+  if (!nextTarget) return board;
+
+  const insertIndex = input.afterCardId === null
+    ? 0
+    : nextTarget.cards.findIndex((item) => item.id === input.afterCardId) + 1;
+  if (input.afterCardId !== null && insertIndex === 0) return board;
+
+  const nextLists = listsWithoutCard.map((list) => list.id === input.toListId
+    ? { ...list, cards: [...list.cards.slice(0, insertIndex), { ...card, listId: input.toListId }, ...list.cards.slice(insertIndex)] }
+    : list);
+  return { ...board, lists: nextLists };
+}
+
+export function applyCardMoved(board: BoardData, event: { cardId: string; toListId: string; position: number }): BoardData {
+  const source = board.lists.find((list) => list.cards.some((card) => card.id === event.cardId));
+  const destination = board.lists.find((list) => list.id === event.toListId);
+  if (!source || !destination) return board;
+  const card = source.cards.find((item) => item.id === event.cardId);
+  if (!card) return board;
+
+  const nextLists = board.lists.map((list) => {
+    const remaining = list.cards.filter((item) => item.id !== event.cardId);
+    if (list.id !== event.toListId) return { ...list, cards: remaining };
+    return {
+      ...list,
+      cards: [...remaining, { ...card, listId: event.toListId, position: event.position }]
+        .sort((left, right) => left.position - right.position),
+    };
+  });
+  return { ...board, lists: nextLists };
+}
+
+export function applyCardUpserted(board: BoardData, card: BoardCard): BoardData {
+  if (!board.lists.some((list) => list.id === card.listId)) return board;
+  return {
+    ...board,
+    lists: board.lists.map((list) => {
+      const remaining = list.cards.filter((item) => item.id !== card.id);
+      return list.id === card.listId
+        ? { ...list, cards: [...remaining, card].sort((left, right) => left.position - right.position) }
+        : { ...list, cards: remaining };
+    }),
+  };
+}
+
+export function applyCardDeleted(board: BoardData, cardId: string): BoardData {
+  return {
+    ...board,
+    lists: board.lists.map((list) => ({ ...list, cards: list.cards.filter((card) => card.id !== cardId) })),
+  };
 }
