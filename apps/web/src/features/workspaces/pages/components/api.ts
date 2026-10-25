@@ -52,6 +52,15 @@ export function useWorkspaceSettings(workspaceId: string) {
   });
 }
 
+export function useWorkspace(workspaceId: string) {
+  return useWorkspaceSettings(workspaceId);
+}
+
+export function useMyRole(workspaceId: string) {
+  const workspaceQuery = useWorkspaceSettings(workspaceId);
+  return workspaceQuery.data?.myRole;
+}
+
 export function useWorkspaceMembers(workspaceId: string) {
   return useQuery({
     queryKey: workspaceKeys.members(workspaceId),
