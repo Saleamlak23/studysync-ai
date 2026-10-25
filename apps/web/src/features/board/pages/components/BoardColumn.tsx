@@ -1,5 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { BoardList } from '../board.api.js';
 import { BoardCard } from './BoardCard.js';
 
@@ -15,6 +16,8 @@ type BoardColumnProps = {
   onDelete: (list: BoardList) => void;
   onMove: (list: BoardList, direction: 'up' | 'down') => void;
   onMoveCard: (cardId: string, toListId: string, afterCardId: string | null) => void;
+  onAddCard: (list: BoardList) => void;
+  onOpenCard: (list: BoardList, cardId: string) => void;
 };
 
 export function BoardColumn({
@@ -29,6 +32,8 @@ export function BoardColumn({
   onDelete,
   onMove,
   onMoveCard,
+  onAddCard,
+  onOpenCard,
 }: BoardColumnProps) {
   const droppable = useDroppable({
     id: `${idPrefix}:list:${list.id}`,
@@ -89,6 +94,7 @@ export function BoardColumn({
           </div>
         )}
       </header>
+      <button type="button" onClick={() => onAddCard(list)} className="mb-3 inline-flex min-h-(--size-touch) w-full items-center justify-center gap-2 rounded-md border border-dashed border-line-strong text-sm font-medium text-fg-muted hover:bg-surface hover:text-fg"><Plus aria-hidden="true" className="size-4" />Add card</button>
       {list.cards.length > 0 ? (
         <div className="space-y-2">
           {list.cards.map((card) => (
@@ -99,6 +105,7 @@ export function BoardColumn({
               idPrefix={idPrefix}
               lists={lists}
               onMove={onMoveCard}
+              onOpen={() => onOpenCard(list, card.id)}
             />
           ))}
         </div>

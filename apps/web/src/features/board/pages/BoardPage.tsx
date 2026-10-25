@@ -18,6 +18,7 @@ import { ApiError } from '@/shared/lib/api.js';
 import { Button, Dialog, EmptyState } from '@/shared/ui/index.js';
 import { BoardColumn } from './components/BoardColumn.js';
 import { BoardListDialog } from './components/BoardListDialog.js';
+import { BoardCardDialog } from './components/BoardCardDialog.js';
 import {
   useBoard,
   useCreateBoardList,
@@ -61,6 +62,11 @@ export function BoardPage() {
   const [listToEdit, setListToEdit] = useState<BoardList | null>(null);
   const [listToDelete, setListToDelete] = useState<BoardList | null>(null);
   const [actionError, setActionError] = useState('');
+  const [cardDialog, setCardDialog] = useState<{ open: boolean; listId: string; listName: string; cardId: string | null }>({ open: false, listId: '', listName: '', cardId: null });
+
+  function openCard(list: BoardList, cardId: string | null = null) {
+    setCardDialog({ open: true, listId: list.id, listName: list.name, cardId });
+  }
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
@@ -224,6 +230,8 @@ export function BoardPage() {
                   onDelete={setListToDelete}
                   onMove={(list, direction) => void reorderList(list, direction)}
                   onMoveCard={requestCardMove}
+                  onAddCard={(list) => openCard(list)}
+                  onOpenCard={(list, cardId) => openCard(list, cardId)}
                 />
               </div>
             )}
@@ -244,6 +252,8 @@ export function BoardPage() {
                 onDelete={setListToDelete}
                 onMove={(item, direction) => void reorderList(item, direction)}
                 onMoveCard={requestCardMove}
+                onAddCard={(item) => openCard(item)}
+                onOpenCard={(item, cardId) => openCard(item, cardId)}
               />
             ))}
           </div>
@@ -255,6 +265,16 @@ export function BoardPage() {
         list={listToEdit}
         onOpenChange={(open) => { setListDialogOpen(open); if (!open) setListToEdit(null); }}
         onSave={saveList}
+      />
+
+      <BoardCardDialog
+        open={cardDialog.open}
+        onOpenChange={(open) => setCardDialog((current) => ({ ...current, open }))}
+        workspaceId={workspaceId}
+        listId={cardDialog.listId}
+        listName={cardDialog.listName}
+        cardId={cardDialog.cardId}
+        role={role}
       />
 
       <Dialog
