@@ -35,7 +35,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Depends on: A02, B01
 - Server tasks needed (use MSW mocks until done): S00
 - Requirements: FR-AUTH-01, 02
-- Tests: form validation component tests
+- Tests: form validation component tests (TC-AUTH-01, TC-AUTH-02)
 - Read first: AGENTS.md 10.2, 10.9; docs/API.md section 2; wireframe 1
 - Task: Pages with Zod validation from `@studysync/shared`, error code messages, redirect after login, logout action, invite-link users returned to /join/:code after login.
 - Done in: `feature/auth-client-login-register`, 2026-10-25

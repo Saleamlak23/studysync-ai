@@ -124,7 +124,7 @@ export function AuthPage() {
         <div className="mb-5 grid grid-cols-2 rounded-md border border-line bg-surface-muted p-1">
           <button
             type="button"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/login', { state: location.state })}
             aria-label="Select email sign in form"
             className={[
               'rounded-md px-3 py-2 text-sm font-semibold transition-colors',
@@ -135,7 +135,7 @@ export function AuthPage() {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/register')}
+            onClick={() => navigate('/register', { state: location.state })}
             aria-label="Select account creation form"
             className={[
               'rounded-md px-3 py-2 text-sm font-semibold transition-colors',
@@ -206,7 +206,9 @@ export function AuthPage() {
           <button
             type="button"
             className="font-semibold text-primary underline decoration-from-font underline-offset-2"
-            onClick={() => navigate(currentMode === 'login' ? '/register' : '/login')}
+            onClick={() =>
+              navigate(currentMode === 'login' ? '/register' : '/login', { state: location.state })
+            }
           >
             {currentMode === 'login' ? 'Create an account' : 'Sign in'}
           </button>
