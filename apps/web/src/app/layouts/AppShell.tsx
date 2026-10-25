@@ -2,7 +2,7 @@ import { LayoutDashboard, LogOut, Shield, Sparkles, FolderKanban } from 'lucide-
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/features/notifications';
 import { signOut, useSession } from '@/shared/lib/session.js';
-import { Avatar, Button } from '@/shared/ui/index.js';
+import { Avatar } from '@/shared/ui/index.js';
 
 export function AppShell() {
   const session = useSession();
