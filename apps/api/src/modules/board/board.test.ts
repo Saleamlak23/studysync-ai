@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { createServer } from 'node:http';
-// Reuse the already installed workspace Socket.io client for end-to-end protocol coverage.
-import { io as connectSocket } from '../../../../web/node_modules/socket.io-client/build/esm/index.js';
+import { io as connectSocket } from 'socket.io-client';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../db/prisma.js';
