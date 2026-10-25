@@ -78,7 +78,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A07 · Board view
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/board-client-view`
 - Depends on: A02
 - Server tasks needed (use MSW mocks until done): S03
@@ -86,7 +86,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests for states and role visibility
 - Read first: AGENTS.md 10.5, 10.10, 11.6, 11.7; docs/API.md section 4; wireframe 3 (desktop and mobile)
 - Task: Lists with cards (layout), list create, rename, delete, reorder for Admin and Owner, loading, empty and error states, mobile list tabs.
-- Done in: (branch, date)
+- Done in: `feature/board-client-view`, 2026-10-26
 
 ### A08 · Board drag and drop, live updates
 
