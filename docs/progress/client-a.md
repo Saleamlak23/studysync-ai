@@ -42,7 +42,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A04 · Workspace list, create and join
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/workspaces-client-list-create-join`
 - Depends on: A03
 - Server tasks needed (use MSW mocks until done): S01, S02
@@ -50,7 +50,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests; 404 and 409 on join
 - Read first: AGENTS.md 5.1, 10.5; docs/API.md section 3; wireframe 2
 - Task: WorkspaceList and CreateWorkspaceDialog (exported through the feature index.ts for B03), and the /join/:code page.
-- Done in: (branch, date)
+- Done in: `feature/workspaces-client-list-create-join`, 2026-10-25
 
 ### A05 · Workspace settings
 
