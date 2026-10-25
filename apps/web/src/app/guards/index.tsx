@@ -1,3 +1,2 @@
-import { Outlet } from 'react-router-dom';
-export function RequireAuth() { return <Outlet />; }
-export function RequireSystemAdmin() { return <Outlet />; }
+export { RequireAuth } from './RequireAuth.js';
+export { RequireSystemAdmin } from './RequireSystemAdmin.js';

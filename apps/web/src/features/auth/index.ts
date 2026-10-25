@@ -1,3 +1,3 @@
 export { authRoutes } from './routes.js';
-export function useSession() { return null; }
-export function RequireAuth() { return null; }
+export { useSession } from '@/shared/lib/session.js';
+export { RequireAuth } from '@/app/guards/RequireAuth.js';

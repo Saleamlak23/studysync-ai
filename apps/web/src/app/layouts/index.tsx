@@ -1,5 +1,4 @@
-import { Outlet } from 'react-router-dom';
-export function AuthLayout() { return <Outlet />; }
-export function AppShell() { return <Outlet />; }
-export function WorkspaceLayout() { return <Outlet />; }
-export function AdminLayout() { return <Outlet />; }
+export { AuthLayout } from './AuthLayout.js';
+export { AppShell } from './AppShell.js';
+export { WorkspaceLayout } from './WorkspaceLayout.js';
+export { AdminLayout } from './AdminLayout.js';
