@@ -17,7 +17,7 @@ filesRouter.post('/workspaces/:id/files', validate({ params: workspaceIdParams }
 }));
 
 filesRouter.get('/workspaces/:id/files', validate({ params: workspaceIdParams, query: pagination }), loadMembership(), requireRole('MEMBER'), asyncHandler(async (req, res) => {
-  res.json(await listFiles(req.params.id, req.query));
+  res.json(await listFiles(req.params.id, pagination.parse(req.query)));
 }));
 
 filesRouter.get('/files/:id', validate({ params: idParam }), withWorkspace((req) => getFileWorkspaceId(req.params.id)), requireRole('MEMBER'), asyncHandler(async (req, res) => {

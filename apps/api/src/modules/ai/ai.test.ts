@@ -1,6 +1,7 @@
 import request from 'supertest';
-import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '../../db/prisma.js';
 import { AppError } from '../../lib/errors.js';
@@ -13,7 +14,7 @@ import { routeAIRequest } from './providers/router.js';
 import { MockAIProvider } from '../../tests/mocks/aiProvider.js';
 
 const app = createApp();
-const testRequire = createRequire(import.meta.url);
+const testFixtures = resolve(fileURLToPath(new URL('.', import.meta.url)), 'fixtures');
 const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 async function createAiFixture(targetApp = app) {
@@ -226,8 +227,8 @@ describe('AI feature endpoints', () => {
     expect(oversizedResponse.status).toBe(413);
 
     const parserSamples = [
-      { name: 'sample.pdf', mimeType: 'application/pdf', path: testRequire.resolve('pdf-parse/test/data/01-valid.pdf') },
-      { name: 'sample.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', path: testRequire.resolve('mammoth/test/test-data/comments.docx') },
+      { name: 'sample.pdf', mimeType: 'application/pdf', path: resolve(testFixtures, 'sample.pdf') },
+      { name: 'sample.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', path: resolve(testFixtures, 'sample.docx') },
     ];
     for (const sample of parserSamples) {
       const bytes = await readFile(sample.path);
@@ -237,7 +238,7 @@ describe('AI feature endpoints', () => {
       } });
       const extracted = await request(api).post(`/api/v1/workspaces/${owner.workspaceId}/ai/summarize`).set(auth(owner.token))
         .send({ target: { type: 'file', id: file.id } });
-      expect(extracted.status).toBe(200);
+      expect(extracted.status, `${sample.name}: ${JSON.stringify(extracted.body)}`).toBe(200);
       expect(extracted.body.summary).toMatch(/^A concise summary/);
     }
   });
