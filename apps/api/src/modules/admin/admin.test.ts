@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { createServer } from 'node:http';
-import { io as connectSocket } from 'socket.io-client';
+import { io as connectSocket } from '../../../../web/node_modules/socket.io-client/build/esm/index.js';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../app.js';
 import { prisma } from '../../db/prisma.js';

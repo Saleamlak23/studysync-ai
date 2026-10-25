@@ -1,6 +1,7 @@
 import { Prisma, type File as FileRecord } from '@prisma/client';
 import type { Express } from 'express';
 import { pagination } from '@studysync/shared';
+import type { z } from 'zod';
 import { env } from '../../config/env.js';
 import { Errors, AppError } from '../../lib/errors.js';
 import { prisma } from '../../db/prisma.js';
@@ -17,6 +18,7 @@ const fileMetadata = {
 } as const;
 
 type StoredFile = Pick<FileRecord, 'workspaceId' | 'name' | 'mimeType' | 'sizeBytes'>;
+type FileListQuery = z.infer<typeof pagination>;
 
 interface FileStorage {
   save(workspaceId: string, uploaderId: string, file: Express.Multer.File): Promise<unknown>;
@@ -69,7 +71,7 @@ export async function createFile(workspaceId: string, uploaderId: string, file?:
   return fileStorage.save(workspaceId, uploaderId, file);
 }
 
-export async function listFiles(workspaceId: string, input: unknown) {
+export async function listFiles(workspaceId: string, input: FileListQuery) {
   const query = pagination.parse(input);
   const cursor = query.cursor
     ? await prisma.file.findFirst({ where: { id: query.cursor, workspaceId }, select: { id: true, createdAt: true } })
