@@ -90,7 +90,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A08 · Board drag and drop, live updates
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/board-client-dnd-live`
 - Depends on: A07, B02
 - Server tasks needed (use MSW mocks until done): S05
@@ -98,7 +98,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: unit tests for moveCardLocally, applyCardMoved, afterCardId calculation
 - Read first: AGENTS.md 10.3, 10.6; docs/SDD.md 13.3; docs/API.md section 11
 - Task: dnd-kit with pointer, touch and keyboard sensors, optimistic move with rollback, board socket listeners, refetch on reconnect and on renumbered, "Move to list" menu for mobile and keyboard.
-- Done in: (branch, date)
+- Done in: `feature/board-client-dnd-live`, 2026-10-26
 
 ### A09 · Card dialog
 

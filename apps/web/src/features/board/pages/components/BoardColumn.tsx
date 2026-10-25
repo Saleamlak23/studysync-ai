@@ -1,3 +1,4 @@
+import { useDroppable } from '@dnd-kit/core';
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from 'lucide-react';
 import type { BoardList } from '../board.api.js';
 import { BoardCard } from './BoardCard.js';
@@ -9,9 +10,11 @@ type BoardColumnProps = {
   listCount: number;
   isMoving: boolean;
   idPrefix: 'mobile' | 'desktop';
+  lists: BoardList[];
   onRename: (list: BoardList) => void;
   onDelete: (list: BoardList) => void;
   onMove: (list: BoardList, direction: 'up' | 'down') => void;
+  onMoveCard: (cardId: string, toListId: string, afterCardId: string | null) => void;
 };
 
 export function BoardColumn({
@@ -21,14 +24,22 @@ export function BoardColumn({
   listCount,
   isMoving,
   idPrefix,
+  lists,
   onRename,
   onDelete,
   onMove,
+  onMoveCard,
 }: BoardColumnProps) {
+  const droppable = useDroppable({
+    id: `${idPrefix}:list:${list.id}`,
+    data: { type: 'list', listId: list.id },
+  });
+
   return (
     <section
+      ref={droppable.setNodeRef}
       aria-labelledby={`board-${idPrefix}-list-${list.id}`}
-      className="w-full shrink-0 rounded-lg bg-surface-muted p-2.5 md:w-(--size-list)"
+      className={`w-full shrink-0 rounded-lg bg-surface-muted p-2.5 md:w-(--size-list) ${droppable.isOver ? 'outline outline-2 outline-primary-soft-line' : ''}`}
     >
       <header className="mb-3 flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
@@ -80,7 +91,16 @@ export function BoardColumn({
       </header>
       {list.cards.length > 0 ? (
         <div className="space-y-2">
-          {list.cards.map((card) => <BoardCard key={card.id} card={card} />)}
+          {list.cards.map((card) => (
+            <BoardCard
+              key={card.id}
+              card={card}
+              listId={list.id}
+              idPrefix={idPrefix}
+              lists={lists}
+              onMove={onMoveCard}
+            />
+          ))}
         </div>
       ) : (
         <p className="rounded-md border border-dashed border-line-strong px-3 py-4 text-center text-sm text-fg-muted">
