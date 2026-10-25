@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const mammoth = require('mammoth') as {
   extractRawText(input: { buffer: Buffer }): Promise<{ value: string }>;
 };
-const parsePdf = require('pdf-parse/lib/pdf-parse.js') as (buffer: Buffer) => Promise<{ text: string }>;
+const parsePdf = require('pdf-parse/lib/pdf-parse.js') as (buffer: Uint8Array) => Promise<{ text: string }>;
 
 export const AI_CONTEXT_CHAR_LIMIT = 12_000;
 type ContextItem = z.infer<typeof aiContextItem>;
@@ -28,7 +28,7 @@ async function extractFileText(mimeType: string, data: Uint8Array, sizeBytes: nu
   const buffer = Buffer.from(data);
   try {
     if (mimeType === 'text/plain') return buffer.toString('utf8');
-    if (mimeType === 'application/pdf') return (await parsePdf(buffer)).text;
+    if (mimeType === 'application/pdf') return (await parsePdf(Uint8Array.from(buffer))).text;
     if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       return (await mammoth.extractRawText({ buffer })).value;
     }
@@ -123,4 +123,3 @@ export function safeJson(text: string): unknown {
 export function wrapUntrusted(text: string) {
   return `<user_content>\n${sanitizeDelimiter(text)}\n</user_content>`;
 }
-

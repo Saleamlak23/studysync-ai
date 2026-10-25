@@ -1,2 +1,10 @@
-// Owner: Frontend B. Follow AGENTS.md sections 4.2 and 5.1. Requirements: see AGENTS.md requirement index.
-export function AdminPage() { return <main className="bg-canvas p-6 text-fg"><h1 className="text-xl font-semibold">Admin</h1></main>; }
+import { AdminUsersPanel } from '@/features/admin';
+
+export function AdminPage() {
+  return (
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <h1 className="text-2xl font-bold tracking-tight">User administration</h1>
+      <AdminUsersPanel />
+    </div>
+  );
+}

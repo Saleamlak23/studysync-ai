@@ -128,7 +128,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B11 · Admin pages
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/admin-client-users-ai`
 - Depends on: A02
 - Server tasks needed (use MSW mocks until done): S15
@@ -136,7 +136,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: form validation and role guard tests
 - Read first: AGENTS.md 10.9; docs/API.md section 10; wireframe 7 (desktop and mobile)
 - Task: /admin: user table with search, suspend and reactivate, AI usage table, AI limits form (positive integers).
-- Done in: (branch, date)
+- Done in: `feature/admin-client-users-ai`, 2026-10-25
 
 ### B12 · End-to-end demo path
 
@@ -148,4 +148,3 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Read first: AGENTS.md 12; docs/TEST-PLAN.md sections 1 and 5.6; docs/SRS.md section 9
 - Task: Playwright with the mocked AI provider: register, create a workspace, add a card, send a chat message, run an AI breakdown and confirm, check the cards appear.
 - Done in: (branch, date)
-
