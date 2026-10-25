@@ -19,14 +19,14 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A02 · App shell and router
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/app-client-shell-router`
 - Depends on: A01
 - Requirements: NFR-12
 - Tests: component tests for the guards
 - Read first: AGENTS.md 5.1, 10.4, 11.7; wireframes 1 to 3 (desktop and mobile)
 - Task: AuthLayout, AppShell (sidebar on desktop, bottom navigation below md), WorkspaceLayout, AdminLayout, RequireAuth, RequireSystemAdmin, router composition. Placeholders for NotificationBell, AiPanel and SearchBox until their tasks are done.
-- Done in: (branch, date)
+- Done in: `feature/app-client-shell-router`, 2026-10-25
 
 ### A03 · Login and register
 
