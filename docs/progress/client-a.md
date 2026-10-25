@@ -66,7 +66,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A06 · Profile edit
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/profile-client-edit`
 - Depends on: A03
 - Server tasks needed (use MSW mocks until done): S00
@@ -74,7 +74,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: form validation test
 - Read first: AGENTS.md 10.9; docs/API.md section 2
 - Task: Profile dialog to edit name, bio and avatar, reachable from the shell.
-- Done in: (branch, date)
+- Done in: `feature/profile-client-edit`, 2026-10-26
 
 ### A07 · Board view
 

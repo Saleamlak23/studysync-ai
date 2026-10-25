@@ -1,2 +1,24 @@
-// Owner: Frontend A. Follow AGENTS.md sections 4.2 and 5.1. Requirements: see AGENTS.md requirement index.
-export function ProfilePage() { return <main className="bg-canvas p-6 text-fg"><h1 className="text-xl font-semibold">Profile</h1></main>; }
+import { useNavigate } from 'react-router-dom';
+import { useSession } from '@/shared/lib/session.js';
+import { EmptyState, Spinner } from '@/shared/ui/index.js';
+import { ProfileDialog } from './ProfileDialog.js';
+
+// Owner: Frontend A. Requirement: FR-PROF-01.
+export function ProfilePage() {
+  const session = useSession();
+  const navigate = useNavigate();
+
+  if (session.status === 'loading') {
+    return <main className="flex min-h-48 items-center justify-center" aria-label="Profile loading"><Spinner /></main>;
+  }
+
+  if (session.status === 'unauthenticated') {
+    return (
+      <main className="bg-canvas p-4 text-fg sm:p-6">
+        <EmptyState title="Profile unavailable" description="Sign in to view and edit your profile." />
+      </main>
+    );
+  }
+
+  return <ProfileDialog user={session.user} onClose={() => navigate('/')} />;
+}
