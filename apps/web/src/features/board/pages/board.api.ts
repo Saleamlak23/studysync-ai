@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Priority } from '@studysync/shared';
-import { createListBody, moveCardBody, moveListBody, patchListBody } from '@studysync/shared';
+import {
+  createCardBody,
+  createCommentBody,
+  createListBody,
+  moveCardBody,
+  moveListBody,
+  patchCardBody,
+  patchListBody,
+} from '@studysync/shared';
 import { api } from '@/shared/lib/api.js';
 
 export type BoardCard = {
@@ -19,6 +27,34 @@ export type BoardData = {
   lists: BoardList[];
 };
 
+export type BoardLabel = { id: string; workspaceId: string; name: string; color: string };
+export type BoardCardDetails = BoardCard & {
+  description: string | null;
+  dueDate: string | null;
+  createdById: string | null;
+  labels: Array<{ cardId: string; labelId: string; label: BoardLabel }>;
+};
+export type BoardMember = {
+  user: { id: string; name: string; email: string; avatarUrl: string | null };
+  role: 'OWNER' | 'ADMIN' | 'MEMBER';
+  joinedAt: string;
+};
+export type CardComment = {
+  id: string;
+  cardId: string;
+  authorId: string | null;
+  body: string;
+  createdAt: string;
+  author: { id: string; name: string; avatarUrl: string | null } | null;
+};
+
+export const cardKeys = {
+  detail: (cardId: string) => ['board-card', cardId] as const,
+  comments: (cardId: string) => ['board-card', cardId, 'comments'] as const,
+  members: (workspaceId: string) => ['board-card-options', workspaceId, 'members'] as const,
+  labels: (workspaceId: string) => ['board-card-options', workspaceId, 'labels'] as const,
+};
+
 export type MoveCardInput = { cardId: string; toListId: string; afterCardId: string | null };
 
 export const boardKeys = {
@@ -30,6 +66,94 @@ export function useBoard(workspaceId: string) {
     queryKey: boardKeys.detail(workspaceId),
     queryFn: () => api<BoardData>(`/workspaces/${workspaceId}/board`),
     enabled: Boolean(workspaceId),
+  });
+}
+
+export function useBoardCard(cardId: string | null) {
+  return useQuery({
+    queryKey: cardKeys.detail(cardId ?? ''),
+    queryFn: () => api<BoardCardDetails>(`/cards/${cardId}`),
+    enabled: Boolean(cardId),
+  });
+}
+
+export function useBoardCardMembers(workspaceId: string, enabled = true) {
+  return useQuery({
+    queryKey: cardKeys.members(workspaceId),
+    queryFn: () => api<BoardMember[]>(`/workspaces/${workspaceId}/members`),
+    enabled: Boolean(workspaceId) && enabled,
+  });
+}
+
+export function useBoardCardLabels(workspaceId: string, enabled = true) {
+  return useQuery({
+    queryKey: cardKeys.labels(workspaceId),
+    queryFn: () => api<BoardLabel[]>(`/workspaces/${workspaceId}/labels`),
+    enabled: Boolean(workspaceId) && enabled,
+  });
+}
+
+export function useBoardCardComments(cardId: string | null) {
+  return useQuery({
+    queryKey: cardKeys.comments(cardId ?? ''),
+    queryFn: () => api<CardComment[]>(`/cards/${cardId}/comments`),
+    enabled: Boolean(cardId),
+  });
+}
+
+export function useCreateBoardCard(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listId, input }: { listId: string; input: unknown }) => {
+      const body = createCardBody.parse(input);
+      return api<BoardCardDetails>(`/lists/${listId}/cards`, { method: 'POST', body });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: boardKeys.detail(workspaceId) }),
+  });
+}
+
+export function useUpdateBoardCard(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ cardId, input }: { cardId: string; input: unknown }) => {
+      const body = patchCardBody.parse(input);
+      return api<BoardCardDetails>(`/cards/${cardId}`, { method: 'PATCH', body });
+    },
+    onSuccess: (card) => {
+      queryClient.setQueryData(cardKeys.detail(card.id), card);
+      void queryClient.invalidateQueries({ queryKey: boardKeys.detail(workspaceId) });
+    },
+  });
+}
+
+export function useDeleteBoardCard(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (cardId: string) => api<void>(`/cards/${cardId}`, { method: 'DELETE' }),
+    onSuccess: (_result, cardId) => {
+      queryClient.removeQueries({ queryKey: cardKeys.detail(cardId) });
+      queryClient.removeQueries({ queryKey: cardKeys.comments(cardId) });
+      void queryClient.invalidateQueries({ queryKey: boardKeys.detail(workspaceId) });
+    },
+  });
+}
+
+export function useCreateBoardCardComment(cardId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ body, mentionIds }: { body: string; mentionIds: string[] }) => {
+      const input = createCommentBody.parse({ body, ...(mentionIds.length ? { mentionIds } : {}) });
+      return api<CardComment>(`/cards/${cardId}/comments`, { method: 'POST', body: input });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: cardKeys.comments(cardId) }),
+  });
+}
+
+export function useDeleteBoardCardComment(cardId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (commentId: string) => api<void>(`/comments/${commentId}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: cardKeys.comments(cardId) }),
   });
 }
 

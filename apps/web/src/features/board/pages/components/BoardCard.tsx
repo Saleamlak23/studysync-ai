@@ -17,9 +17,10 @@ type BoardCardProps = {
   idPrefix: 'mobile' | 'desktop';
   lists: BoardList[];
   onMove: (cardId: string, toListId: string, afterCardId: string | null) => void;
+  onOpen: () => void;
 };
 
-export function BoardCard({ card, listId, idPrefix, lists, onMove }: BoardCardProps) {
+export function BoardCard({ card, listId, idPrefix, lists, onMove, onOpen }: BoardCardProps) {
   const assigneeNames = card.assignees.map(({ user }) => user.name);
   const draggableId = `${idPrefix}:card:${card.id}`;
   const draggable = useDraggable({
@@ -44,7 +45,7 @@ export function BoardCard({ card, listId, idPrefix, lists, onMove }: BoardCardPr
     >
       <Card variant="tile" className="space-y-3">
         <div className="flex min-w-0 items-start gap-2">
-          <h3 className="min-w-0 flex-1 break-words text-sm font-medium text-fg">{card.title}</h3>
+          <button type="button" onClick={onOpen} className="min-h-(--size-touch) min-w-0 flex-1 break-words text-left text-sm font-medium text-fg underline-offset-2 hover:underline">{card.title}</button>
           <button
             ref={draggable.setActivatorNodeRef}
             type="button"

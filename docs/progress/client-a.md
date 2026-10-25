@@ -102,7 +102,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A09 · Card dialog
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/board-client-card-dialog`
 - Depends on: A07
 - Server tasks needed (use MSW mocks until done): S03, S04
@@ -110,7 +110,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests; 400 and 403 states
 - Read first: AGENTS.md 10.7, 10.9, 11.6; docs/API.md section 4; wireframes 3 and 4
 - Task: Create, edit and delete cards (full-screen sheet on mobile): title, description, priority, due date, assignees, labels (label palette only), comments with mentions. Selecting a card sets the AI context.
-- Done in: (branch, date)
+- Done in: `feature/board-client-card-dialog`, 2026-10-26
 
 ### A10 · Search box
 

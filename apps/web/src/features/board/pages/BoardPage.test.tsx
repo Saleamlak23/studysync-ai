@@ -26,6 +26,7 @@ vi.mock('@/features/workspaces', () => ({
   useMyRole: vi.fn(),
 }));
 vi.mock('./useBoardSocket.js', () => ({ useBoardSocket: vi.fn() }));
+vi.mock('./components/BoardCardDialog.js', () => ({ BoardCardDialog: () => null }));
 
 const card = {
   id: 'card-1',
