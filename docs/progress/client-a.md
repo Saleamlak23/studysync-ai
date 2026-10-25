@@ -54,7 +54,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A05 · Workspace settings
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/workspaces-client-settings`
 - Depends on: A04
 - Server tasks needed (use MSW mocks until done): S01, S02
@@ -62,7 +62,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: component tests for role-based visibility
 - Read first: AGENTS.md 10.9, 10.10; docs/API.md section 3; wireframe 6 (desktop and mobile)
 - Task: /w/:id/settings: members and roles, remove member, invite links (create, copy, revoke), AI consent (Owner only), archive (Owner only). Hide or disable actions by role.
-- Done in: (branch, date)
+- Done in: `feature/workspaces-client-settings`, 2026-10-25
 
 ### A06 · Profile edit
 

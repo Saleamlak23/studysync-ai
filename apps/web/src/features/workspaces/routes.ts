@@ -1,10 +1,11 @@
 import { createElement } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { JoinWorkspacePage } from './pages/JoinWorkspacePage.js';
+import { WorkspaceSettingsPage } from './pages/WorkspaceSettingsPage.js';
 import { WorkspacesPage } from './pages/WorkspacesPage.js';
 
 export const workspaceRoutes: RouteObject[] = [
-  { path: '/w/:workspaceId/settings', element: createElement(WorkspacesPage) },
+  { path: '/w/:workspaceId/settings', element: createElement(WorkspaceSettingsPage) },
 ];
 
 export const workspacesRoutes: RouteObject[] = [
