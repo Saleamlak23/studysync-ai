@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { useAiContext, type AiContextItem } from '@/shared/stores/aiContext.js';
@@ -42,12 +42,12 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
   const workspaceId = workspaceIdProp ?? params.id ?? '';
   const queryClient = useQueryClient();
   const { items, clear } = useAiContext();
+  const questionId = useId();
   const workspace = useWorkspaceAiState(workspaceId);
   const ask = useAskAi(workspaceId);
   const summarize = useSummarizeAi(workspaceId);
   const [question, setQuestion] = useState('');
   const [result, setResult] = useState<AiResult | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const requestPending = ask.isPending || summarize.isPending;
   const canUseAi = workspace.data?.aiEnabled === true;
@@ -92,7 +92,6 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
         <h2 className="text-base font-semibold text-fg">AI assistant</h2>
         <p className="text-xs text-fg-muted">Ask or summarize selected workspace content.</p>
       </div>
-      {isOpen && <button type="button" aria-label="Close AI assistant" onClick={() => setIsOpen(false)} className="min-h-11 shrink-0 rounded-md px-3 text-sm font-medium text-fg hover:bg-surface-muted xl:hidden">Close</button>}
     </header>
 
     <p className="rounded-md border border-ai-soft-line bg-ai-soft p-3 text-sm text-fg">
@@ -126,9 +125,12 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
     {items.length > 1 && <p className="-mt-3 text-xs text-fg-muted">Select one item at a time to summarize.</p>}
 
     <form onSubmit={submitQuestion} className="flex flex-col gap-2">
-      <label htmlFor="ai-question" className="text-sm font-semibold text-fg">Ask a question</label>
-      <textarea id="ai-question" value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={10000} rows={3} placeholder="Ask about the selected content…" className="min-h-24 w-full resize-y rounded-md border border-line bg-surface px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-faint focus-visible:ring-2 focus-visible:ring-focus" />
-      <button type="submit" disabled={!workspaceId || !canUseAi || items.length === 0 || !question.trim() || requestPending} className="min-h-11 w-full rounded-md bg-ai px-4 text-sm font-semibold text-white hover:bg-ai-hover disabled:cursor-not-allowed disabled:opacity-50">
+      <label htmlFor={questionId} className="text-sm font-semibold text-fg">Ask a question</label>
+      <textarea id={questionId} value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={10000} rows={3} placeholder="Ask about the selected content…" className="min-h-24 w-full resize-y rounded-md border border-line bg-surface px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-faint focus-visible:ring-2 focus-visible:ring-focus" />
+      {canUseAi && (items.length === 0 || !question.trim()) && <p id={`${questionId}-hint`} className="text-xs text-fg-muted">
+        Select workspace content and enter a question to enable Ask AI.
+      </p>}
+      <button type="submit" aria-describedby={canUseAi && (items.length === 0 || !question.trim()) ? `${questionId}-hint` : undefined} disabled={!workspaceId || !canUseAi || items.length === 0 || !question.trim() || requestPending} className="min-h-11 w-full rounded-md bg-ai px-4 text-sm font-semibold text-white hover:bg-ai-hover disabled:cursor-not-allowed disabled:opacity-50">
         {ask.isPending ? 'Asking…' : 'Ask AI'}
       </button>
     </form>
@@ -143,10 +145,6 @@ export function AiPanel({ workspaceId: workspaceIdProp }: { workspaceId?: string
 
   return <>
     {isBreakdownOpen && workspaceId && <BreakdownDialog workspaceId={workspaceId} onClose={() => setIsBreakdownOpen(false)} />}
-    <aside className="hidden h-full w-[var(--size-ai-panel)] shrink-0 xl:flex">{panel}</aside>
-    <button type="button" aria-expanded={isOpen} onClick={() => setIsOpen(true)} className="fixed bottom-[calc(var(--size-bottom-nav)+1rem)] right-4 z-30 min-h-11 rounded-full bg-ai px-4 text-sm font-semibold text-white shadow-md hover:bg-ai-hover xl:hidden">AI assistant</button>
-    {isOpen && <div className="fixed inset-0 z-40 flex items-end bg-fg/40 p-3 md:items-stretch md:justify-end xl:hidden">
-      <div id="mobile-ai-panel" role="dialog" aria-modal="true" aria-label="AI assistant" className="h-[85dvh] w-full md:h-full md:max-w-md">{panel}</div>
-    </div>}
+    {panel}
   </>;
 }

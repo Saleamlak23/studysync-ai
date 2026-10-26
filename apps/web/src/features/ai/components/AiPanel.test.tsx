@@ -30,6 +30,7 @@ describe('AiPanel', () => {
     expect(screen.getByText(/sent to third-party AI providers, whose terms apply/)).toBeInTheDocument();
     expect(screen.getByText(/Select a card, message range or file/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ask AI' })).toBeDisabled();
+    expect(screen.getByText('Select workspace content and enter a question to enable Ask AI.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Summarize selected item' })).toBeDisabled();
   });
 
@@ -52,6 +53,7 @@ describe('AiPanel', () => {
     renderPanel();
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Ask a question' }), { target: { value: 'What is the plan?' } });
+    expect(screen.getByRole('button', { name: 'Ask AI' })).toBeEnabled();
     fireEvent.click(screen.getByRole('button', { name: 'Ask AI' }));
 
     expect(await screen.findByRole('region', { name: 'AI answer' })).toHaveTextContent('The team plans a release.');

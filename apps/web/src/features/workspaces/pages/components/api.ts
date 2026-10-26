@@ -118,7 +118,13 @@ export function useSetWorkspaceAiConsent(workspaceId: string) {
       const body = setWorkspaceAiConsentBody.parse({ enabled });
       return api<{ aiEnabled: boolean; aiConsentAt: string | null }>(`/workspaces/${workspaceId}/ai-consent`, { method: 'PUT', body });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: workspaceKeys.detail(workspaceId) }),
+    onSuccess: (consent) => {
+      queryClient.setQueryData(['workspace-ai-consent', workspaceId], {
+        id: workspaceId,
+        aiEnabled: consent.aiEnabled,
+      });
+      return queryClient.invalidateQueries({ queryKey: workspaceKeys.detail(workspaceId) });
+    },
   });
 }
 

@@ -264,6 +264,8 @@ describe('Layouts (NFR-12)', () => {
       await waitFor(() => {
         expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
+      expect(within(screen.getByRole('dialog')).getByRole('textbox', { name: 'Ask a question' })).toBeInTheDocument();
+      expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'Break down a project' })).toBeInTheDocument();
     });
   });
 

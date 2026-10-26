@@ -106,7 +106,7 @@ export function WorkspaceLayout() {
               type="button"
               onClick={() => setIsAiOpen(true)}
               aria-label="Open AI assistant"
-              className="xl:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium border border-ai-soft-line bg-ai-soft text-ai hover:bg-ai-soft/80 min-h-11 transition-colors"
+              className="hidden md:inline-flex xl:hidden items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium border border-ai-soft-line bg-ai-soft text-ai hover:bg-ai-soft/80 min-h-11 transition-colors"
             >
               <Sparkles className="size-4" strokeWidth={1.75} />
               <span>AI assistant</span>
@@ -163,9 +163,7 @@ export function WorkspaceLayout() {
         title="AI assistant"
         side={isMobile ? 'bottom' : 'right'}
       >
-        <div className="p-2">
-          <AiPanel workspaceId={workspaceId} />
-        </div>
+        <AiPanel workspaceId={workspaceId} />
       </Sheet>
     </div>
   );

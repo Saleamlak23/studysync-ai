@@ -55,7 +55,7 @@ function setupApi() {
 function renderSettings() {
   setSession(sessionUsers[currentRole], 'test-access-token');
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
-  return render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={['/w/workspace-1/settings']}>
         <Routes>
@@ -65,6 +65,7 @@ function renderSettings() {
       </MemoryRouter>
     </QueryClientProvider>,
   );
+  return { ...view, queryClient };
 }
 
 describe('WorkspaceSettingsPage', () => {
@@ -169,11 +170,13 @@ describe('WorkspaceSettingsPage', () => {
   });
 
   it('TC-WS-06: updates AI consent through the documented endpoint', async () => {
-    renderSettings();
+    const { queryClient } = renderSettings();
     await screen.findByRole('heading', { name: 'StudySync Team settings' });
+    queryClient.setQueryData(['workspace-ai-consent', 'workspace-1'], { id: 'workspace-1', aiEnabled: false });
     fireEvent.click(screen.getByRole('checkbox', { name: 'Enable AI for this workspace' }));
     await waitFor(() => expect(api).toHaveBeenCalledWith('/workspaces/workspace-1/ai-consent', { method: 'PUT', body: { enabled: true } }));
     await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Enable AI for this workspace' })).toBeChecked());
+    expect(queryClient.getQueryData(['workspace-ai-consent', 'workspace-1'])).toEqual({ id: 'workspace-1', aiEnabled: true });
   });
 
   it('TC-WS-05: confirms archiving and returns to the workspace list', async () => {
