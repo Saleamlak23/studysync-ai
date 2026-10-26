@@ -18,8 +18,10 @@ export async function getWorkspaceDashboard(
   requestedAt = new Date(),
 ) {
   // 1. Load the board with its lists in position order (asc = first → last).
-  const board = await prisma.board.findUniqueOrThrow({
+  const board = await prisma.board.upsert({
     where: { workspaceId },
+    create: { workspaceId },
+    update: {},
     include: {
       lists: {
         orderBy: { position: 'asc' },

@@ -170,6 +170,41 @@ describe('board lists and cards', () => {
     expect(deleted.status).toBe(204);
   });
 
+  it('TC-TASK-01: recreates a missing board when the workspace board is requested', async () => {
+    const owner = await register('Missing Board Owner');
+    const workspaceId = await createWorkspace(owner.token);
+    await prisma.board.delete({ where: { workspaceId } });
+
+    const response = await request(app)
+      .get(`/api/v1/workspaces/${workspaceId}/board`)
+      .set(auth(owner.token));
+
+    expect(response.status).toBe(200);
+    expect(response.body.board).toMatchObject({ workspaceId, name: 'Board' });
+    expect(response.body.lists).toEqual([]);
+    expect(await prisma.board.findUnique({ where: { workspaceId } })).not.toBeNull();
+  });
+
+  it('TC-TASK-01: recreates a missing board when an Admin creates a list', async () => {
+    const owner = await register('Missing Board List Owner');
+    const workspaceId = await createWorkspace(owner.token);
+    await prisma.board.delete({ where: { workspaceId } });
+
+    const response = await request(app)
+      .post(`/api/v1/workspaces/${workspaceId}/lists`)
+      .set(auth(owner.token))
+      .send({ name: 'Recovered list' });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({ name: 'Recovered list', position: 1024 });
+    const board = await prisma.board.findUnique({
+      where: { workspaceId },
+      include: { lists: true },
+    });
+    expect(board?.lists).toHaveLength(1);
+    expect(board?.lists[0]?.id).toBe(response.body.id);
+  });
+
   it('TC-TASK-02: creates and edits cards with workspace assignees and labels, then enforces delete permissions', async () => {
     const owner = await register('Card Owner');
     const author = await register('Card Author');

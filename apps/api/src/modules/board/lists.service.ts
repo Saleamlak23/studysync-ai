@@ -16,8 +16,12 @@ export async function getListWorkspaceId(listId: string) {
 export async function createList(workspaceId: string, input: unknown) {
   const { name } = createListBody.parse(input);
   const created = await prisma.$transaction(async (tx) => {
-    const board = await tx.board.findUnique({ where: { workspaceId }, select: { id: true } });
-    if (!board) throw Errors.notFound('Board');
+    const board = await tx.board.upsert({
+      where: { workspaceId },
+      create: { workspaceId },
+      update: {},
+      select: { id: true },
+    });
     const lastList = await tx.list.findFirst({
       where: { boardId: board.id },
       orderBy: { position: 'desc' },

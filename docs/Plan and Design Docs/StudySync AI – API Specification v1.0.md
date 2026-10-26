@@ -82,8 +82,8 @@ A card's status is the list it sits in. Positions are computed by the server; cl
 
 | Method and path | Role | Request | Response and notes |
 | --- | --- | --- | --- |
-| GET /workspaces/:id/board | Member | none | 200 `{ board, lists: [{ ...list, cards: [Card] }] }` |
-| POST /workspaces/:id/lists | Admin | name | 201 List, appended at the end |
+| GET /workspaces/:id/board | Member | none | 200 `{ board, lists: [{ ...list, cards: [Card] }] }`; creates an empty board if the workspace's board record is missing |
+| POST /workspaces/:id/lists | Admin | name | 201 List, appended at the end; creates an empty board if the workspace's board record is missing |
 | PATCH /lists/:id | Admin | name | 200 List |
 | POST /lists/:id/move | Admin | afterListId? | 200 List; omitted means move to the start |
 | DELETE /lists/:id | Admin | none | 204; deletes its cards |
@@ -149,7 +149,7 @@ AI-specific errors: AI\_DISABLED (403), AI\_LIMIT\_REACHED (429, with `resetAt`)
 | Method and path | Role | Request | Response and notes |
 | --- | --- | --- | --- |
 | GET /workspaces/:id/search | Member | q (min 2 characters), type? (cards, messages, files), limit? | 200 `{ cards[], messages[], files[] }` with snippets; full-text search, membership enforced |
-| GET /workspaces/:id/dashboard | Member | none | 200 `{ cardsPerList[], overdue, completed, open, contributions[] }` |
+| GET /workspaces/:id/dashboard | Member | none | 200 `{ cardsPerList[], overdue, completed, open, contributions[] }`; creates an empty board if the workspace's board record is missing |
 
 ## 10. System Administration
 

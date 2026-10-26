@@ -80,7 +80,7 @@ AI tests use the mocked provider unless marked manual.
 
 | ID | Req | Steps | Expected result | Type |
 | --- | --- | --- | --- | --- |
-| TC-TASK-01 | FR-TASK-01 | Create, rename, move and delete a list as Admin and as Member | Admin succeeds; Member 403; order persisted | I |
+| TC-TASK-01 | FR-TASK-01 | Create, rename, move and delete a list as Admin and as Member; request a board and create a list after removing its board record | Admin succeeds; Member 403; order persisted; missing board is recreated | I |
 | TC-TASK-02 | FR-TASK-02 | Create a card with assignees and labels; edit; delete; assign a non-member | Saved; non-member assignee 400; new assignee notified | I |
 | TC-TASK-03 | FR-TASK-03 | Move cards within and between lists; send two moves at once; move to another workspace's list; make the gap tiny | Order consistent, no duplicate positions; cross-workspace 400; list renumbered when needed | I, U |
 | TC-TASK-04 | FR-TASK-04 | Two clients on one board; one creates, edits, moves, deletes a card; a non-member client listens | The other client receives each event within 1 s; the non-member receives nothing | S |
@@ -127,7 +127,7 @@ AI tests use the mocked provider unless marked manual.
 | ID | Req | Steps | Expected result | Type |
 | --- | --- | --- | --- | --- |
 | TC-SRCH-01 | FR-SRCH-01 | Search a card title, description, message and file name; search content from another workspace; a 1-character query | Matches with snippets; nothing from other workspaces; short query 400 | I |
-| TC-ANA-01 | FR-ANA-01 | Seed cards across lists, some overdue, some in the last list; GET dashboard | Counts per list, overdue, completed and open match the seed | I |
+| TC-ANA-01 | FR-ANA-01 | Seed cards across lists, some overdue, some in the last list; GET dashboard; repeat with the board record removed | Counts per list, overdue, completed and open match the seed; a missing board is recreated and returns empty aggregates | I |
 | TC-ADM-01 | FR-ADM-01 | System Admin lists, searches, suspends and reactivates; a normal user tries | Works for System Admin; others 403 | I |
 | TC-ADM-02 | FR-ADM-02 | View AI usage with filters; read and change the limits with GET and PUT /admin/ai-limits, then use up the new limit | Totals match request logs; invalid values 400; the new limits apply at once and survive a restart | I |
 

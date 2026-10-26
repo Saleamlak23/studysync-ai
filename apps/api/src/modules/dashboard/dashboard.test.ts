@@ -114,6 +114,25 @@ describe('workspace dashboard', () => {
     expect(res.body.contributions).toEqual([]);
   });
 
+  it('TC-ANA-01: restores a missing board and returns an empty dashboard', async () => {
+    const owner = await createDashboardWorkspace();
+    await prisma.board.delete({ where: { workspaceId: owner.workspaceId } });
+
+    const res = await request(app)
+      .get(`/api/v1/workspaces/${owner.workspaceId}/dashboard`)
+      .set(auth(owner.token));
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      cardsPerList: [],
+      overdue: 0,
+      completed: 0,
+      open: 0,
+      contributions: [],
+    });
+    expect(await prisma.board.findUnique({ where: { workspaceId: owner.workspaceId } })).not.toBeNull();
+  });
+
   // ------------------------------------------------------------------
   // Negative cases
   // ------------------------------------------------------------------

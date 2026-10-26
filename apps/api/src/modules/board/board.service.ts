@@ -12,8 +12,10 @@ const cardRelations = {
 };
 
 export async function getBoard(workspaceId: string) {
-  const board = await prisma.board.findUnique({
+  const board = await prisma.board.upsert({
     where: { workspaceId },
+    create: { workspaceId },
+    update: {},
     include: {
       lists: {
         orderBy: { position: 'asc' },
