@@ -1,2 +1,2 @@
 export { searchRoutes } from './routes.js';
-export function SearchBox() { return null; }
+export { SearchBox } from './components/SearchBox.js';

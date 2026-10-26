@@ -114,7 +114,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A10 · Search box
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/search-client-box`
 - Depends on: A07
 - Server tasks needed (use MSW mocks until done): S13
@@ -122,7 +122,7 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 - Tests: debounce and minimum length test
 - Read first: AGENTS.md 10.5; docs/API.md section 9; wireframes 3 and 5
 - Task: SearchBox in the workspace top bar with a results panel (cards, messages, files) linking to board or chat, minimum 2 characters, debounce, empty and error states.
-- Done in: (branch, date)
+- Done in: `feature/search-client-box`, 2026-10-26
 
 ### A11 · Responsive and accessibility pass
 
