@@ -180,4 +180,33 @@ describe('workspaces API', () => {
     expect(disabled.status).toBe(200);
     expect(disabled.body.aiEnabled).toBe(false);
   });
+
+  it('TC-WS-07: lists member and open-card counts without leaking board internals', async () => {
+    const owner = await register('Summary Owner');
+    const member = await register('Summary Member');
+    const created = await request(app)
+      .post('/api/v1/workspaces')
+      .set(auth(owner.token))
+      .send({ name: 'Summary workspace' });
+    const workspaceId = created.body.id as string;
+    const board = await prisma.board.findUniqueOrThrow({ where: { workspaceId } });
+    const openList = await prisma.list.create({ data: { boardId: board.id, name: 'In progress', position: 1024 } });
+    const completedList = await prisma.list.create({ data: { boardId: board.id, name: 'Done', position: 2048 } });
+    await prisma.membership.create({ data: { userId: member.id, workspaceId, role: 'MEMBER' } });
+    await prisma.card.createMany({ data: [
+      { listId: openList.id, title: 'Open task', position: 1024 },
+      { listId: completedList.id, title: 'Completed task', position: 1024 },
+    ] });
+
+    const listed = await request(app).get('/api/v1/workspaces').set(auth(owner.token));
+    expect(listed.status).toBe(200);
+    expect(listed.body[0]).toMatchObject({
+      id: workspaceId,
+      myRole: 'OWNER',
+      memberCount: 2,
+      openCardCount: 1,
+    });
+    expect(listed.body[0].board).toBeUndefined();
+    expect(listed.body[0]._count).toBeUndefined();
+  });
 });

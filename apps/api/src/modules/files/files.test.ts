@@ -124,6 +124,30 @@ describe('files API', () => {
     expect(invalidCursor.status).toBe(400);
   });
 
+  it('TC-FILE-04: returns workspace file totals only to members', async () => {
+    const owner = await register('Summary File Owner');
+    const outsider = await register('Summary File Outsider');
+    const workspaceId = await createWorkspace(owner.token);
+    await upload(workspaceId, owner.token, Buffer.from('first'), 'first.txt', 'text/plain');
+    await upload(workspaceId, owner.token, Buffer.from('second file'), 'second.txt', 'text/plain');
+
+    const noAuth = await request(app).get(`/api/v1/workspaces/${workspaceId}/files/summary`);
+    expect(noAuth.status).toBe(401);
+    const nonMember = await request(app)
+      .get(`/api/v1/workspaces/${workspaceId}/files/summary`)
+      .set(auth(outsider.token));
+    expect(nonMember.status).toBe(404);
+    const summary = await request(app)
+      .get(`/api/v1/workspaces/${workspaceId}/files/summary`)
+      .set(auth(owner.token));
+    expect(summary.status).toBe(200);
+    expect(summary.body).toEqual({
+      fileCount: 2,
+      usedBytes: Buffer.byteLength('first') + Buffer.byteLength('second file'),
+      limitBytes: env.WORKSPACE_STORAGE_CAP_BYTES,
+    });
+  });
+
   it('TC-CHAT-04: attaches an uploaded file to a message and rejects a file from another workspace', async () => {
     const owner = await register('Attachment Owner');
     const otherOwner = await register('Other Attachment Owner');

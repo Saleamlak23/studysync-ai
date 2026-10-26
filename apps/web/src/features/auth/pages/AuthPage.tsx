@@ -149,6 +149,11 @@ export function AuthPage() {
         <div className="mb-5">
           <h1 className="text-2xl font-bold tracking-tight text-fg">{title}</h1>
           <p className="mt-1 text-sm text-fg-muted">{subtitle}</p>
+          <p className="mt-2 text-xs text-fg-muted">
+            {fromPath
+              ? 'You are joining a workspace. Sign in or create an account to continue.'
+              : 'Joining a workspace? Open its invite link to continue here.'}
+          </p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>

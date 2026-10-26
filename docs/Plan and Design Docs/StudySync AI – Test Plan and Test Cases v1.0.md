@@ -71,9 +71,10 @@ AI tests use the mocked provider unless marked manual.
 | TC-WS-01 | FR-WS-01 | Create a workspace | Creator is Owner; a board and a #general channel exist | I |
 | TC-WS-02 | FR-WS-02 | Create an invite; second user joins; join again; use a revoked and an expired link | Joins as Member; second join 409; bad links 404 | I |
 | TC-WS-03 | FR-WS-03 | Owner changes a role; Admin tries; try to change the Owner | Owner succeeds; Admin 403; Owner role unchanged | I |
-| TC-WS-04 | FR-WS-04 | Admin removes a Member; Admin removes the Owner; a Member leaves | Member removed; Owner removal 403; leaving works | I |
+| TC-WS-04 | FR-WS-04 | Admin removes a Member; Admin removes the Owner; a Member and Admin leave from workspace settings | Member removed; Owner removal 403; both non-owner roles can confirm leaving and return to the workspace list | I |
 | TC-WS-05 | FR-WS-05 | Archive; list workspaces; restore; set archive date 31 days back and run the purge job | Hidden after archive; restore works within 30 days; purge deletes the workspace and its children | I |
 | TC-WS-06 | FR-WS-06 | Owner enables AI; Admin tries to change it | Only the Owner can; consent time and user recorded | I |
+| TC-WS-07 | FR-WS-01 | List workspaces with members and cards in open lists; inspect the response | Each workspace has accurate member and open-card counts; cards in the final-position list are excluded | I |
 
 ### 5.3 Kanban Board
 
@@ -97,6 +98,7 @@ AI tests use the mocked provider unless marked manual.
 | TC-FILE-01 | FR-FILE-01 | Upload each allowed type; a file of 5 MB plus 1 byte; a disallowed type; exceed the workspace cap | Allowed 201; too large 413; type 415; cap 413 STORAGE\_LIMIT\_REACHED | I |
 | TC-FILE-02 | FR-FILE-02 | Download as a member and as a non-member | Member gets the exact bytes and type; non-member 404 | I |
 | TC-FILE-03 | FR-FILE-03 | List files after several uploads | Newest first with uploader; no file bytes in the list | I |
+| TC-FILE-04 | FR-FILE-03 | Request workspace file summary as a member, non-member and unauthenticated user | Member receives total file count, used bytes and storage limit; non-member 404; no token 401 | I |
 
 ### 5.5 Notifications and Reminders
 
@@ -154,6 +156,12 @@ AI tests use the mocked provider unless marked manual.
 | ID | Scope | Steps | Expected result | Type |
 | --- | --- | --- | --- | --- |
 | TC-UX-01 | Route error recovery | Trigger a route loader or lazy import failure from both the authentication and authenticated route trees; select each recovery action | Branded error page replaces the framework developer screen; technical details are hidden; retry reloads and dashboard navigation works | I, M |
+
+## 6.2 Supplemental Wireframe-Parity Test
+
+| ID | Scope | Steps | Expected result | Type |
+| --- | --- | --- | --- | --- |
+| TC-UX-02 | Workspace navigation and collaboration entry | At desktop and 360 px, open the personal dashboard and a workspace; use create/join actions, workspace shortcuts, workspace navigation and the Files panel | Dashboard shows workspace cards with member/open-task counts and create/join actions; sidebar shortcuts work; workspace mobile navigation shows Board, Chat, Files (with count) and Settings; file storage usage and capacity are visible | M |
 
 ## 7. Schedule
 

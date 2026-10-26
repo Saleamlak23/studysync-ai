@@ -1,18 +1,22 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, ApiError } from '@/shared/lib/api.js';
 import { Button } from '@/shared/ui/index.js';
-import type { WorkspaceCreated } from './components/api.js';
+import { workspaceKeys, type WorkspaceCreated } from './components/api.js';
 
 export function JoinWorkspacePage() {
   const { code = '' } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string>();
   const joinWorkspace = useMutation({
     mutationFn: () => api<WorkspaceCreated>(`/invites/${encodeURIComponent(code)}/join`, { method: 'POST' }),
-    onSuccess: (workspace) => navigate(`/w/${workspace.id}`),
+    onSuccess: async (workspace) => {
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.list });
+      navigate(`/w/${workspace.id}`);
+    },
     onError: (error) => {
       if (error instanceof ApiError && error.status === 404) {
         setErrorMessage('This invite link is invalid, revoked, or expired.');

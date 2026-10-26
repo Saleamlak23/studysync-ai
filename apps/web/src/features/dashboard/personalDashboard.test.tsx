@@ -1,6 +1,7 @@
 import type { PersonalDashboard as PersonalDashboardData } from '@studysync/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PersonalDashboard } from '@/features/dashboard';
 
@@ -20,31 +21,39 @@ const card: PersonalDashboardData['assignedCards'][number] = {
 
 function renderDashboard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}><PersonalDashboard /></QueryClientProvider>);
+  return render(<QueryClientProvider client={client}><MemoryRouter><PersonalDashboard /></MemoryRouter></QueryClientProvider>);
+}
+
+function mockDashboardResponse(result: unknown) {
+  apiMock.mockImplementation((path: string) => Promise.resolve(path === '/workspaces' ? [] : result));
 }
 
 afterEach(() => apiMock.mockReset());
 
 describe('PersonalDashboard (TC-PROF-02)', () => {
   it('shows loading while dashboard data is pending', () => {
-    apiMock.mockReturnValue(new Promise(() => undefined));
+    apiMock.mockImplementation((path: string) => path === '/workspaces'
+      ? Promise.resolve([])
+      : new Promise(() => undefined));
     renderDashboard();
     expect(screen.getByRole('status', { name: 'Loading dashboard' })).toBeInTheDocument();
   });
   it('shows empty states when there are no assigned cards or deadlines', async () => {
-    apiMock.mockResolvedValue({ assignedCards: [], upcomingDeadlines: [] });
+    mockDashboardResponse({ assignedCards: [], upcomingDeadlines: [] });
     renderDashboard();
     expect(await screen.findByText('You have no assigned cards yet.')).toBeInTheDocument();
     expect(screen.getByText('You have no upcoming deadlines.')).toBeInTheDocument();
   });
   it('shows an actionable error state when the request fails', async () => {
-    apiMock.mockRejectedValue(new Error('Please sign in to continue.'));
+    apiMock.mockImplementation((path: string) => path === '/workspaces'
+      ? Promise.resolve([])
+      : Promise.reject(new Error('Please sign in to continue.')));
     renderDashboard();
     expect(await screen.findByRole('alert')).toHaveTextContent('We could not load your dashboard. Try again.');
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
   it('shows assigned cards and upcoming deadline context', async () => {
-    apiMock.mockResolvedValue({ assignedCards: [card], upcomingDeadlines: [card] });
+    mockDashboardResponse({ assignedCards: [card], upcomingDeadlines: [card] });
     renderDashboard();
     expect(await screen.findAllByText('Review the project plan')).toHaveLength(2);
     expect(screen.getAllByText(/Study group/)).toHaveLength(2);

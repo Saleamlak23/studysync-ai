@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+export const workspaceSummarySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  myRole: z.enum(['MEMBER', 'ADMIN', 'OWNER']),
+  memberCount: z.number().int().nonnegative(),
+  openCardCount: z.number().int().nonnegative(),
+});
+export type WorkspaceSummary = z.infer<typeof workspaceSummarySchema>;
+
 export const createWorkspaceBody = z.object({
   name: z.string().trim().min(1).max(80),
   description: z.string().optional(),

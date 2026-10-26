@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { WorkspaceRole } from '@studysync/shared';
 import { ApiError } from '@/shared/lib/api.js';
-import { Button, Dialog, EmptyState } from '@/shared/ui/index.js';
+import { useSession } from '@/shared/lib/session.js';
+import { Badge, Button, Dialog, EmptyState } from '@/shared/ui/index.js';
 import {
   useRemoveWorkspaceMember,
   useUpdateWorkspaceMemberRole,
@@ -19,14 +21,20 @@ export function WorkspaceMembersSection({
   workspaceId: string;
   role: WorkspaceRole;
 }) {
+  const navigate = useNavigate();
+  const session = useSession();
   const membersQuery = useWorkspaceMembers(workspaceId);
   const updateRole = useUpdateWorkspaceMemberRole(workspaceId);
   const removeMember = useRemoveWorkspaceMember(workspaceId);
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [roleError, setRoleError] = useState<string>();
   const [removeError, setRemoveError] = useState<string>();
+  const [leaveError, setLeaveError] = useState<string>();
   const canManageMembers = role === 'OWNER' || role === 'ADMIN';
   const canChangeRoles = role === 'OWNER';
+  const currentUserId = session.status === 'authenticated' ? session.user.id : undefined;
+  const canLeaveWorkspace = role !== 'OWNER' && Boolean(currentUserId);
   const selectedMember = membersQuery.data?.find((member) => member.user.id === memberToRemove);
 
   function confirmRemove() {
@@ -38,12 +46,45 @@ export function WorkspaceMembersSection({
     });
   }
 
+  function confirmLeave() {
+    if (!currentUserId) return;
+    setLeaveError(undefined);
+    removeMember.mutate(currentUserId, {
+      onSuccess: () => navigate('/workspaces'),
+      onError: (error) => setLeaveError(errorText(error, 'We could not leave this workspace. Try again.')),
+    });
+  }
+
   return (
     <section aria-labelledby="workspace-members-heading" className="space-y-3 rounded-lg border border-line bg-surface p-4 sm:p-5">
       <header>
         <h2 id="workspace-members-heading" className="text-lg font-semibold text-fg">Members</h2>
         <p className="mt-1 text-sm text-fg-muted">Manage workspace roles and access.</p>
       </header>
+
+      <section aria-labelledby="workspace-role-guide-heading" className="space-y-2 rounded-md border border-line bg-surface-muted p-3">
+        <h3 id="workspace-role-guide-heading" className="text-sm font-semibold text-fg">Workspace role guide</h3>
+        <p className="flex flex-wrap items-center gap-2 text-sm text-fg">
+          Your workspace role: <Badge>{role[0] + role.slice(1).toLowerCase()}</Badge>
+        </p>
+        <dl className="grid gap-2 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="font-semibold text-fg">Owner</dt>
+            <dd className="text-fg-muted">Assigns roles, manages invites and AI consent, and archives the workspace.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-fg">Admin</dt>
+            <dd className="text-fg-muted">Manages invites and members, but not role assignments, AI consent, or archiving.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-fg">Member</dt>
+            <dd className="text-fg-muted">Collaborates on workspace content.</dd>
+          </div>
+        </dl>
+        <p className="text-xs text-fg-muted">
+          Non-owners can leave the workspace. System Admin is a separate platform role and does not grant workspace access.
+        </p>
+      </section>
 
       {membersQuery.isPending ? (
         <div role="status" aria-label="Loading workspace members" className="space-y-2">
@@ -62,13 +103,15 @@ export function WorkspaceMembersSection({
         <>
           {roleError && <p role="alert" className="text-sm text-danger">{roleError}</p>}
           {removeError && <p role="alert" className="text-sm text-danger">{removeError}</p>}
+          {leaveError && <p role="alert" className="text-sm text-danger">{leaveError}</p>}
           <ul className="space-y-2">
             {membersQuery.data.map((member) => {
               const isOwner = member.role === 'OWNER';
+              const isCurrentUser = member.user.id === currentUserId;
               return (
                 <li key={member.user.id} className="flex min-w-0 flex-col gap-3 rounded-md border border-line p-3 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1">
-                    <p className="break-words font-medium text-fg">{member.user.name}</p>
+                    <p className="break-words font-medium text-fg">{member.user.name}{isCurrentUser ? ' (you)' : ''}</p>
                     <p className="break-all text-sm text-fg-muted">{member.user.email}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -93,11 +136,9 @@ export function WorkspaceMembersSection({
                         </select>
                       </label>
                     ) : (
-                      <span className="rounded-sm bg-surface-muted px-2 py-1 text-xs font-medium text-fg-muted">
-                        {member.role.toLowerCase()}
-                      </span>
+                      <Badge>{member.role[0] + member.role.slice(1).toLowerCase()}</Badge>
                     )}
-                    {canManageMembers && !isOwner && (
+                    {canManageMembers && !isOwner && !isCurrentUser && (
                       <Button
                         variant="danger"
                         size="lg"
@@ -119,6 +160,22 @@ export function WorkspaceMembersSection({
         </>
       )}
 
+      {canLeaveWorkspace && (
+        <div className="border-t border-line pt-3">
+          <Button
+            variant="danger"
+            size="lg"
+            disabled={removeMember.isPending}
+            onClick={() => {
+              setLeaveError(undefined);
+              setLeaveDialogOpen(true);
+            }}
+          >
+            Leave workspace
+          </Button>
+        </div>
+      )}
+
       <Dialog
         open={Boolean(selectedMember)}
         onOpenChange={(open) => { if (!open && !removeMember.isPending) setMemberToRemove(null); }}
@@ -128,6 +185,17 @@ export function WorkspaceMembersSection({
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button size="lg" onClick={() => setMemberToRemove(null)} disabled={removeMember.isPending}>Cancel</Button>
           <Button size="lg" variant="danger" loading={removeMember.isPending} onClick={confirmRemove}>Remove member</Button>
+        </div>
+      </Dialog>
+      <Dialog
+        open={leaveDialogOpen}
+        onOpenChange={(open) => { if (!open && !removeMember.isPending) setLeaveDialogOpen(false); }}
+        title="Leave workspace?"
+        description="You will lose access to this workspace."
+      >
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button size="lg" onClick={() => setLeaveDialogOpen(false)} disabled={removeMember.isPending}>Cancel</Button>
+          <Button size="lg" variant="danger" loading={removeMember.isPending} onClick={confirmLeave}>Leave workspace</Button>
         </div>
       </Dialog>
     </section>

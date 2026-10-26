@@ -10,6 +10,7 @@ export * from './schemas/board.js';
 export * from './schemas/ai.js';
 export * from './schemas/dashboard.js';
 export * from './schemas/chat.js';
+export * from './schemas/files.js';
 export * from './schemas/notifications.js';
 export * from './schemas/search.js';
 export * from './schemas/admin.js';

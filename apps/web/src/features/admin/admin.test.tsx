@@ -1,6 +1,6 @@
 import type { AiLimitsResponse, AiUsageResponse } from '@studysync/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -23,6 +23,14 @@ const adminUser = {
   status: 'ACTIVE' as const,
   createdAt: '2026-10-20T10:00:00.000Z',
   updatedAt: '2026-10-20T10:00:00.000Z',
+};
+
+const systemAdminUser = {
+  ...adminUser,
+  id: '4216d273-c00d-4d19-b9a8-fab91d61f8ee',
+  name: 'Platform Administrator',
+  email: 'platform-admin@example.test',
+  systemRole: 'ADMIN' as const,
 };
 
 const usageData: AiUsageResponse = {
@@ -125,6 +133,21 @@ describe('Admin pages', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reactivate' }));
     expect(await screen.findByText('Active')).toBeInTheDocument();
     expect(await screen.findAllByText('User status updated.')).toHaveLength(2);
+  });
+
+  it('TC-ADM-01: shows platform role separately from account status', async () => {
+    server.use(
+      http.get(/\/api\/v1\/admin\/users/, () => HttpResponse.json([adminUser, systemAdminUser])),
+    );
+
+    renderAdmin(<AdminUsersPanel />);
+    expect(await screen.findByText('Platform Administrator')).toBeInTheDocument();
+    expect(screen.getAllByText('Platform role')).toHaveLength(2);
+    const rows = within(screen.getByRole('list', { name: 'User accounts' })).getAllByRole('listitem');
+    expect(within(rows[0]!).getByText('User')).toBeInTheDocument();
+    expect(within(rows[0]!).getByText('Active')).toBeInTheDocument();
+    expect(within(rows[1]!).getByText('System Admin')).toBeInTheDocument();
+    expect(within(rows[1]!).getByText('Active')).toBeInTheDocument();
   });
 
   it('TC-ADM-01: shows an empty state and lets the admin clear user filters', async () => {

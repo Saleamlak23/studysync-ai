@@ -25,10 +25,35 @@ export async function createWorkspace(userId: string, input: unknown) {
 export async function listWorkspaces(userId: string) {
   const memberships = await prisma.membership.findMany({
     where: { userId, workspace: { archivedAt: null } },
-    include: { workspace: true },
+    include: {
+      workspace: {
+        include: {
+          _count: { select: { memberships: true } },
+          board: {
+            select: {
+              lists: { select: { position: true, _count: { select: { cards: true } } } },
+            },
+          },
+        },
+      },
+    },
     orderBy: { joinedAt: 'asc' },
   });
-  return memberships.map(({ workspace, role }) => ({ ...workspace, myRole: role }));
+  return memberships.map(({ workspace, role }) => {
+    const { board, _count, ...workspaceData } = workspace;
+    const lists = board?.lists ?? [];
+    const lastListPosition = lists.reduce((last, list) => Math.max(last, list.position), Number.NEGATIVE_INFINITY);
+    const openCardCount = lists
+      .filter((list) => list.position < lastListPosition)
+      .reduce((total, list) => total + list._count.cards, 0);
+
+    return {
+      ...workspaceData,
+      myRole: role,
+      memberCount: _count.memberships,
+      openCardCount,
+    };
+  });
 }
 
 export async function getWorkspace(userId: string, workspaceId: string) {

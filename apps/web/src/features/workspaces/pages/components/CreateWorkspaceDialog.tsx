@@ -1,10 +1,10 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createWorkspaceBody } from '@studysync/shared';
 import { api, ApiError } from '@/shared/lib/api.js';
 import { Button, Dialog, Input } from '@/shared/ui/index.js';
-import type { WorkspaceCreated } from './api.js';
+import { workspaceKeys, type WorkspaceCreated } from './api.js';
 
 export function CreateWorkspaceDialog({
   open,
@@ -14,6 +14,7 @@ export function CreateWorkspaceDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [nameError, setNameError] = useState<string>();
@@ -21,7 +22,10 @@ export function CreateWorkspaceDialog({
   const createWorkspace = useMutation({
     mutationFn: (body: { name: string; description?: string }) =>
       api<WorkspaceCreated>('/workspaces', { method: 'POST', body }),
-    onSuccess: (workspace) => navigate(`/w/${workspace.id}`),
+    onSuccess: async (workspace) => {
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.list });
+      navigate(`/w/${workspace.id}`);
+    },
   });
 
   function submit(event: FormEvent<HTMLFormElement>) {

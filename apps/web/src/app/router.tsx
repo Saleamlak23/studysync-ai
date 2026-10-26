@@ -6,7 +6,7 @@ import { authRoutes } from '@/features/auth';
 import { boardRoutes } from '@/features/board';
 import { chatRoutes } from '@/features/chat';
 import { dashboardRoutes } from '@/features/dashboard';
-import { filesRoutes } from '@/features/files';
+import { filesRoutes, workspaceFilesRoutes } from '@/features/files';
 import { notificationsRoutes } from '@/features/notifications';
 import { profileRoutes } from '@/features/profile';
 import { searchRoutes } from '@/features/search';
@@ -50,6 +50,7 @@ export const router = createBrowserRouter([
               ...workspaceRoutes,
               ...boardRoutes,
               ...chatRoutes,
+              ...workspaceFilesRoutes,
             ],
           },
         ],

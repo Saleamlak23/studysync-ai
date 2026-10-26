@@ -1,7 +1,8 @@
-import { Kanban, MessageSquare, Settings, Sparkles, LayoutDashboard } from 'lucide-react';
+import { FileText, Kanban, MessageSquare, Settings, Sparkles, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink, Outlet, useParams } from 'react-router-dom';
 import { AiPanel } from '@/features/ai';
+import { useWorkspaceFileSummary } from '@/features/files';
 import { SearchBox } from '@/features/search';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery.js';
 import { Sheet } from '@/shared/ui/index.js';
@@ -10,18 +11,20 @@ export function WorkspaceLayout() {
   const { workspaceId = '' } = useParams<{ workspaceId: string }>();
   const [isAiOpen, setIsAiOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const fileSummary = useWorkspaceFileSummary(workspaceId);
+  const fileCount = fileSummary.data?.fileCount;
 
   const base = `/w/${workspaceId}`;
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full overflow-hidden pb-(--size-bottom-nav) md:pb-0">
       {/* Workspace central area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Workspace sub-navigation & search bar */}
         <div className="shrink-0 border-b border-line bg-surface px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
           <nav
             aria-label="Workspace tabs"
-            className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none"
+            className="hidden md:flex items-center gap-1 overflow-x-auto py-1 scrollbar-none"
           >
             <NavLink
               to={`${base}/board`}
@@ -48,7 +51,21 @@ export function WorkspaceLayout() {
               }
             >
               <MessageSquare className="size-4 shrink-0" strokeWidth={1.75} />
-              <span>Chat & files</span>
+              <span>Chat</span>
+            </NavLink>
+
+            <NavLink
+              to={`${base}/files`}
+              className={({ isActive }) =>
+                `inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-11 ${
+                  isActive
+                    ? 'bg-primary-soft text-primary'
+                    : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
+                }`
+              }
+            >
+              <FileText className="size-4 shrink-0" strokeWidth={1.75} />
+              <span>Files{fileCount === undefined ? '' : ` (${fileCount})`}</span>
             </NavLink>
 
             <NavLink
@@ -110,6 +127,24 @@ export function WorkspaceLayout() {
       >
         <AiPanel workspaceId={workspaceId} />
       </aside>
+
+      <nav
+        aria-label="Workspace mobile navigation"
+        className="fixed bottom-0 left-0 right-0 z-30 flex h-(--size-bottom-nav) items-center justify-around border-t border-line bg-surface px-2 md:hidden"
+      >
+        <NavLink to={`${base}/board`} className={({ isActive }) => `flex min-h-11 min-w-11 flex-col items-center justify-center px-3 py-1 text-xs font-medium ${isActive ? 'text-primary' : 'text-fg-muted'}`}>
+          <Kanban aria-hidden="true" className="size-5" strokeWidth={1.75} /><span className="mt-0.5">Board</span>
+        </NavLink>
+        <NavLink to={`${base}/chat`} className={({ isActive }) => `flex min-h-11 min-w-11 flex-col items-center justify-center px-3 py-1 text-xs font-medium ${isActive ? 'text-primary' : 'text-fg-muted'}`}>
+          <MessageSquare aria-hidden="true" className="size-5" strokeWidth={1.75} /><span className="mt-0.5">Chat</span>
+        </NavLink>
+        <NavLink to={`${base}/files`} className={({ isActive }) => `flex min-h-11 min-w-11 flex-col items-center justify-center px-3 py-1 text-xs font-medium ${isActive ? 'text-primary' : 'text-fg-muted'}`}>
+          <FileText aria-hidden="true" className="size-5" strokeWidth={1.75} /><span className="mt-0.5">{fileCount === undefined ? 'Files' : `Files (${fileCount})`}</span>
+        </NavLink>
+        <NavLink to={`${base}/settings`} className={({ isActive }) => `flex min-h-11 min-w-11 flex-col items-center justify-center px-3 py-1 text-xs font-medium ${isActive ? 'text-primary' : 'text-fg-muted'}`}>
+          <Settings aria-hidden="true" className="size-5" strokeWidth={1.75} /><span className="mt-0.5">Settings</span>
+        </NavLink>
+      </nav>
 
       {/* Floating Lagoon Assistant button on mobile (< md) */}
       <button

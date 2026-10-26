@@ -62,7 +62,7 @@ All errors return `{ "error": { "code": "...", "message": "...", "details": [...
 | Method and path | Role | Request | Response and notes |
 | --- | --- | --- | --- |
 | POST /workspaces | User | name, description? | 201 Workspace; creator becomes Owner; a board and a #general channel are created |
-| GET /workspaces | User | none | 200 `[Workspace]` the caller belongs to (archived excluded) |
+| GET /workspaces | User | none | 200 `[Workspace]` the caller belongs to (archived excluded), each with `myRole`, `memberCount`, and `openCardCount` (cards not in the last-position list) |
 | GET /workspaces/:id | Member | none | 200 Workspace with myRole |
 | PATCH /workspaces/:id | Admin | name?, description? | 200 Workspace |
 | POST /workspaces/:id/archive | Owner | none | 200; soft delete, recoverable for 30 days |
@@ -118,6 +118,7 @@ Allowed types: PDF, DOCX, TXT, PNG, JPG. Maximum size: 5 MB per file (5,242,880 
 | --- | --- | --- | --- |
 | POST /workspaces/:id/files | Member | multipart field `file` | 201 File; 413 if the file or the workspace storage cap is exceeded, 415 if the type is not allowed |
 | GET /workspaces/:id/files | Member | limit? (default 50, max 100), cursor? (file ID) | 200 `[File]` newest first; cursor returns files older than the cursor. Each item includes safe metadata and uploader, never bytes |
+| GET /workspaces/:id/files/summary | Member | none | 200 `{ fileCount, usedBytes, limitBytes }`; workspace-wide totals, without file bytes |
 | GET /files/:id | Member | none | 200 `file download`; the file bytes are streamed with Content-Type and Content-Disposition headers, only after a membership check |
 
 ## 7. Notifications

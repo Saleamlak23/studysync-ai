@@ -30,10 +30,10 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-WS-01 | Create a workspace | 4 | POST /workspaces | Workspace, Membership, Board, Channel | TC-WS-01 | Passed — S01, `apps/api/src/modules/workspaces/workspaces.test.ts` |
+| FR-WS-01 | Create a workspace and list workspace summaries | 4 | POST, GET /workspaces | Workspace, Membership, Board, Channel, List, Card | TC-WS-01, TC-WS-07 | Implemented — workspace summary test added to `apps/api/src/modules/workspaces/workspaces.test.ts`; TC-WS-01 previously passed |
 | FR-WS-02 | Invite and join by link | 4 | POST /workspaces/:id/invites; POST /invites/:code/join | InviteLink, Membership | TC-WS-02 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
-| FR-WS-03 | Owner assigns Admin or Member | 6.1 | PATCH /workspaces/:id/members/:userId | Membership | TC-WS-03 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
-| FR-WS-04 | Remove members | 4 | DELETE /workspaces/:id/members/:userId | Membership | TC-WS-04 | Passed — S02, `apps/api/src/modules/workspaces/members-invites.test.ts` |
+| FR-WS-03 | Owner assigns Admin or Member | 6.1 | PATCH /workspaces/:id/members/:userId | Membership | TC-WS-03 | Passed — API permissions in `apps/api/src/modules/workspaces/members-invites.test.ts`; role controls and guidance in `apps/web/src/features/workspaces/workspaceSettings.test.tsx` |
+| FR-WS-04 | Remove members | 4 | DELETE /workspaces/:id/members/:userId | Membership | TC-WS-04 | Passed — API removal/self-leave in `apps/api/src/modules/workspaces/members-invites.test.ts`; member/admin self-leave UI in `apps/web/src/features/workspaces/workspaceSettings.test.tsx` |
 | FR-WS-05 | Archive with 30-day recovery and purge | 6.5 | POST /workspaces/:id/archive and /restore; daily purge job | Workspace.archivedAt | TC-WS-05 | Passed — S01 archive and restore; S12 purge and cascade coverage in `apps/api/src/jobs/jobs.test.ts` |
 | FR-WS-06 | Owner enables AI and records consent | 6.4 | PUT /workspaces/:id/ai-consent | Workspace.aiEnabled, aiConsentAt | TC-WS-06 | Passed — S01, `apps/api/src/modules/workspaces/workspaces.test.ts` |
 
@@ -58,7 +58,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | FR-CHAT-05 | Catch up after reconnect without duplicates | 6.2 | GET /channels/:id/messages?after= | Message | TC-CHAT-05 | Implemented — TC-CHAT-05 passed for initial, before, and bounded after pages |
 | FR-FILE-01 | Upload with type and size limits | 6.6 | POST /workspaces/:id/files | File, FileBlob | TC-FILE-01 | Passed — S08, allowed types and file/workspace size limits verified |
 | FR-FILE-02 | Download only for workspace members | 6.6 | GET /files/:id | File, FileBlob, Membership | TC-FILE-02 | Passed — S08, exact bytes/type for member; non-member receives 404 |
-| FR-FILE-03 | List workspace files | 4 | GET /workspaces/:id/files | File | TC-FILE-03 | Passed — S08, newest-first safe metadata and cursor paging verified |
+| FR-FILE-03 | List files and view workspace storage usage | 4 | GET /workspaces/:id/files, /workspaces/:id/files/summary | File | TC-FILE-03, TC-FILE-04 | Implemented — list behavior passed; storage summary and API test added |
 
 ### 2.5 Notifications and Reminders
 
@@ -89,7 +89,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 | FR-SRCH-01 | Full-text search within a workspace | 5.2 | GET /workspaces/:id/search | Card, Message, File | TC-SRCH-01 | Implemented — `feature/search-server-fulltext`; TC-SRCH-01 passed (`apps/api/src/modules/search/search.test.ts`) |
 | FR-ANA-01 | Workspace progress dashboard | 4 | GET /workspaces/:id/dashboard | Card, List | TC-ANA-01 | Not started |
 | FR-ANA-02 | Personal view of assigned cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 (shared) | Implemented — TC-PROF-02 added; execution blocked because local PostgreSQL migration setup failed |
-| FR-ADM-01 | List, search, suspend and reactivate users | 4 | GET /admin/users; PATCH /admin/users/:id | User | TC-ADM-01 | Not started |
+| FR-ADM-01 | List, search, suspend and reactivate users | 4 | GET /admin/users; PATCH /admin/users/:id | User | TC-ADM-01 | Passed — API permissions/actions in `apps/api/src/modules/admin/admin.test.ts`; admin UI and distinct platform-role display in `apps/web/src/features/admin/admin.test.tsx` |
 | FR-ADM-02 | View AI usage and adjust limits | 4 | GET /admin/ai-usage; GET and PUT /admin/ai-limits | AIRequestLog, AppSetting | TC-ADM-02 | Not started |
 
 ## 3. Non-Functional Requirements

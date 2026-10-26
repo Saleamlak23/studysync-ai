@@ -18,12 +18,13 @@ vi.mock('@/shared/lib/api.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/lib/api.js')>();
   return {
     ...actual,
-    api: vi.fn().mockResolvedValue({
-      notifications: [],
-      unreadCount: 0,
-      aiConsentGiven: true,
-      aiAvailable: true,
-    }),
+    api: vi.fn((path: string) => Promise.resolve(
+      path === '/workspaces'
+        ? [{ id: 'c747bd88-98c9-4d47-86dd-08c79f801c25', name: 'Study workspace', description: null, myRole: 'OWNER', memberCount: 2, openCardCount: 4 }]
+        : path.endsWith('/files/summary')
+          ? { fileCount: 2, usedBytes: 20, limitBytes: 1000 }
+          : { notifications: [], unreadCount: 0, aiConsentGiven: true, aiAvailable: true },
+    )),
   };
 });
 
@@ -85,7 +86,7 @@ describe('Layouts (NFR-12)', () => {
   });
 
   describe('AppShell', () => {
-    it('renders desktop sidebar with brand and navigation links', () => {
+    it('renders desktop sidebar with brand and navigation links', async () => {
       renderWithProviders(
         <Routes>
           <Route element={<AppShell />}>
@@ -100,6 +101,7 @@ describe('Layouts (NFR-12)', () => {
       expect(mainNav).toBeInTheDocument();
       expect(within(mainNav).getByRole('link', { name: /My dashboard/i })).toBeInTheDocument();
       expect(within(mainNav).getByRole('link', { name: /Workspaces/i })).toBeInTheDocument();
+      expect(await screen.findByRole('link', { name: 'Study workspace' })).toHaveAttribute('href', '/w/c747bd88-98c9-4d47-86dd-08c79f801c25');
       expect(screen.getByText('Rufta Gaiem')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
     });
@@ -128,7 +130,8 @@ describe('Layouts (NFR-12)', () => {
         </Routes>,
       );
 
-      fireEvent.click(screen.getAllByRole('button', { name: 'Edit profile' })[1]!);
+      fireEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+      fireEvent.click(within(screen.getByRole('button', { name: 'Account menu' }).parentElement!).getByRole('button', { name: 'Edit profile' }));
       expect(await screen.findByText('Profile Dialog')).toBeInTheDocument();
     });
 
@@ -192,7 +195,7 @@ describe('Layouts (NFR-12)', () => {
   });
 
   describe('WorkspaceLayout', () => {
-    it('renders workspace navigation tabs and docked AI assistant landmarks', () => {
+    it('renders workspace navigation tabs and docked AI assistant landmarks', async () => {
       renderWithProviders(
         <Routes>
           <Route path="/w/:workspaceId" element={<WorkspaceLayout />}>
@@ -207,9 +210,15 @@ describe('Layouts (NFR-12)', () => {
       const tabs = screen.getByRole('navigation', { name: 'Workspace tabs' });
       expect(tabs).toBeInTheDocument();
       expect(within(tabs).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
-      expect(within(tabs).getByRole('link', { name: 'Chat & files' })).toHaveAttribute('href', '/w/ws-100/chat');
+      expect(within(tabs).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
+      expect(await within(tabs).findByRole('link', { name: 'Files (2)' })).toHaveAttribute('href', '/w/ws-100/files');
       expect(within(tabs).getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/w/ws-100');
       expect(within(tabs).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
+      const mobileNav = screen.getByRole('navigation', { name: 'Workspace mobile navigation' });
+      expect(within(mobileNav).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
+      expect(within(mobileNav).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
+      expect(await within(mobileNav).findByRole('link', { name: 'Files (2)' })).toHaveAttribute('href', '/w/ws-100/files');
+      expect(within(mobileNav).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
 
       // AI assistant landmark
       expect(screen.getByRole('complementary', { name: 'AI assistant' })).toBeInTheDocument();

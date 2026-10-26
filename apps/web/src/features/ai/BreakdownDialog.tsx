@@ -68,8 +68,8 @@ export function BreakdownDialog({ workspaceId, onClose }: { workspaceId: string;
     });
   }
 
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-fg/40 p-3" role="presentation">
-    <section role="dialog" aria-modal="true" aria-labelledby="breakdown-title" className="flex max-h-[92dvh] w-full max-w-3xl flex-col gap-3 overflow-y-auto rounded-lg border border-line bg-surface p-4 text-fg shadow-lg sm:p-6">
+  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-fg/40 p-0 sm:items-center sm:p-3" role="presentation">
+    <section role="dialog" aria-modal="true" aria-labelledby="breakdown-title" className="flex h-[95dvh] max-h-[95dvh] w-full max-w-3xl flex-col gap-3 overflow-y-auto rounded-t-xl border border-line bg-surface p-4 text-fg shadow-lg sm:h-auto sm:max-h-[92dvh] sm:rounded-lg sm:p-6">
       <header className="flex items-center gap-3">
         <h2 id="breakdown-title" className="min-w-0 flex-1 text-lg font-semibold">Break down a project</h2>
         <button type="button" onClick={onClose} disabled={isBusy} className="min-h-11 rounded-md border border-line px-3 text-sm font-medium hover:bg-surface-muted disabled:opacity-50">Close</button>

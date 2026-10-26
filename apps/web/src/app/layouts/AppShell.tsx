@@ -1,16 +1,23 @@
 import { LayoutDashboard, LogOut, Shield, Sparkles, FolderKanban, UserRound } from 'lucide-react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/features/notifications';
+import { WorkspaceActions, useWorkspaces } from '@/features/workspaces';
 import { signOut, useSession } from '@/shared/lib/session.js';
 import { Avatar } from '@/shared/ui/index.js';
 
 export function AppShell() {
   const session = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const user = session.status === 'authenticated' ? session.user : null;
   const isAdmin = user?.systemRole === 'ADMIN';
+  const isWorkspaceRoute = location.pathname.startsWith('/w/');
+  const workspacesQuery = useWorkspaces();
 
   const handleSignOut = async () => {
+    setAccountMenuOpen(false);
     await signOut();
     navigate('/login');
   };
@@ -61,6 +68,35 @@ export function AppShell() {
             <FolderKanban className="size-4 shrink-0" strokeWidth={1.75} />
             <span>Workspaces</span>
           </NavLink>
+
+          <section aria-label="Workspace shortcuts" className="mt-4 border-t border-line pt-3">
+            <div className="mb-2 flex items-center justify-between gap-2 px-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-fg-faint">Your workspaces</h2>
+              <Link to="/workspaces" className="text-xs font-medium text-primary hover:underline">All</Link>
+            </div>
+            {workspacesQuery.isPending && <p role="status" className="px-3 py-2 text-xs text-fg-muted">Loading workspaces…</p>}
+            {workspacesQuery.isError && <div className="px-3 py-2 text-xs text-danger">
+              <p>Workspace shortcuts could not load.</p>
+              <button type="button" onClick={() => void workspacesQuery.refetch()} disabled={workspacesQuery.isFetching} className="mt-1 min-h-11 font-semibold underline disabled:opacity-50">Try again</button>
+            </div>}
+            {workspacesQuery.data && <ul className="space-y-1">
+              {workspacesQuery.data.slice(0, 5).map((workspace) => (
+                <li key={workspace.id}>
+                  <NavLink to={`/w/${workspace.id}`} className={({ isActive }) =>
+                    `block truncate rounded-md px-3 py-2 text-sm transition-colors ${
+                      isActive ? 'bg-primary-soft font-medium text-primary' : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
+                    }`
+                  }>
+                    {workspace.name}
+                  </NavLink>
+                </li>
+              ))}
+              {workspacesQuery.data.length === 0 && <li className="px-3 py-1 text-xs text-fg-muted">No workspaces yet.</li>}
+            </ul>}
+            <div className="mt-2 px-1">
+              <WorkspaceActions compact />
+            </div>
+          </section>
 
           {isAdmin && (
             <div className="pt-4 mt-4 border-t border-line">
@@ -127,34 +163,36 @@ export function AppShell() {
           </div>
 
           <div className="flex items-center gap-2">
-            {user && (
+            {user && <div className="relative md:hidden">
               <button
                 type="button"
-                onClick={() => navigate('/profile')}
-                aria-label="Edit profile"
-                title="Edit profile"
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-fg-muted hover:bg-surface-muted hover:text-fg md:hidden"
+                onClick={() => setAccountMenuOpen((open) => !open)}
+                aria-label="Account menu"
+                aria-expanded={accountMenuOpen}
+                aria-controls="mobile-account-menu"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-fg-muted hover:bg-surface-muted hover:text-fg"
               >
-                {user.avatarUrl ? (
-                  <Avatar name={user.name} src={user.avatarUrl} size="sm" />
-                ) : (
-                  <UserRound className="size-5" strokeWidth={1.75} />
-                )}
+                {user.avatarUrl ? <Avatar name={user.name} src={user.avatarUrl} size="sm" /> : <UserRound className="size-5" strokeWidth={1.75} />}
               </button>
-            )}
+              {accountMenuOpen && <div id="mobile-account-menu" className="absolute right-0 top-full z-40 mt-2 w-48 rounded-lg border border-line bg-surface p-2 shadow-lg">
+                <p className="truncate px-3 py-2 text-sm font-medium text-fg">{user.name}</p>
+                <button type="button" onClick={() => { setAccountMenuOpen(false); navigate('/profile'); }} className="min-h-11 w-full rounded-md px-3 text-left text-sm text-fg hover:bg-surface-muted">Edit profile</button>
+                <button type="button" onClick={() => void handleSignOut()} className="min-h-11 w-full rounded-md px-3 text-left text-sm text-fg hover:bg-surface-muted">Sign out</button>
+              </div>}
+            </div>}
             <NotificationBell />
           </div>
         </header>
 
         {/* Scrollable Page Outlet */}
-        <div className="flex-1 min-w-0 overflow-y-auto pb-(--size-bottom-nav) md:pb-0">
+        <div className={`flex-1 min-w-0 overflow-y-auto ${isWorkspaceRoute ? 'pb-0' : 'pb-(--size-bottom-nav)'} md:pb-0`}>
           <Outlet />
         </div>
 
         {/* Mobile Bottom Navigation (< md) */}
         <nav
           aria-label="Mobile navigation"
-          className="fixed bottom-0 left-0 right-0 h-(--size-bottom-nav) border-t border-line bg-surface flex md:hidden items-center justify-around z-30 px-2"
+          className={`${isWorkspaceRoute ? 'hidden' : 'fixed flex'} bottom-0 left-0 right-0 h-(--size-bottom-nav) border-t border-line bg-surface md:hidden items-center justify-around z-30 px-2`}
         >
           <NavLink
             to="/"

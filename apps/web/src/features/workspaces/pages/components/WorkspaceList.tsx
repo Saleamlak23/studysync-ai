@@ -50,7 +50,11 @@ export function WorkspaceList() {
           >
             <span className="block break-words font-semibold text-fg">{workspace.name}</span>
             {workspace.description && <span className="mt-1 block break-words text-sm text-fg-muted">{workspace.description}</span>}
-            <span className="mt-3 inline-block text-xs font-medium text-fg-muted">{workspace.myRole.toLowerCase()}</span>
+            <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-fg-muted">
+              <span>{workspace.myRole.toLowerCase()}</span>
+              <span>{workspace.memberCount} {workspace.memberCount === 1 ? 'member' : 'members'}</span>
+              <span>{workspace.openCardCount} open {workspace.openCardCount === 1 ? 'task' : 'tasks'}</span>
+            </span>
           </Link>
         </li>
       ))}

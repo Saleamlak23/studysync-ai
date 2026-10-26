@@ -97,6 +97,19 @@ export async function listFiles(workspaceId: string, input: FileListQuery) {
   });
 }
 
+export async function getFileSummary(workspaceId: string) {
+  const [fileCount, aggregate] = await Promise.all([
+    prisma.file.count({ where: { workspaceId } }),
+    prisma.file.aggregate({ where: { workspaceId }, _sum: { sizeBytes: true } }),
+  ]);
+
+  return {
+    fileCount,
+    usedBytes: aggregate._sum.sizeBytes ?? 0,
+    limitBytes: env.WORKSPACE_STORAGE_CAP_BYTES,
+  };
+}
+
 export async function getFileWorkspaceId(fileId: string) {
   const file = await prisma.file.findUnique({ where: { id: fileId }, select: { workspaceId: true } });
   if (!file) throw Errors.notFound('File');

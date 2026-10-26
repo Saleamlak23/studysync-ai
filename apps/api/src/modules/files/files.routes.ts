@@ -6,7 +6,7 @@ import { authenticate } from '../../middleware/authenticate.js';
 import { loadMembership, withWorkspace } from '../../middleware/attachMembership.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { validate } from '../../middleware/validate.js';
-import { createFile, getFileDownload, getFileWorkspaceId, listFiles } from './files.service.js';
+import { createFile, getFileDownload, getFileSummary, getFileWorkspaceId, listFiles } from './files.service.js';
 import { fileUpload } from './upload.js';
 
 export const filesRouter = Router();
@@ -18,6 +18,10 @@ filesRouter.post('/workspaces/:id/files', validate({ params: workspaceIdParams }
 
 filesRouter.get('/workspaces/:id/files', validate({ params: workspaceIdParams, query: pagination }), loadMembership(), requireRole('MEMBER'), asyncHandler(async (req, res) => {
   res.json(await listFiles(req.params.id, pagination.parse(req.query)));
+}));
+
+filesRouter.get('/workspaces/:id/files/summary', validate({ params: workspaceIdParams }), loadMembership(), requireRole('MEMBER'), asyncHandler(async (req, res) => {
+  res.json(await getFileSummary(req.params.id));
 }));
 
 filesRouter.get('/files/:id', validate({ params: idParam }), withWorkspace((req) => getFileWorkspaceId(req.params.id)), requireRole('MEMBER'), asyncHandler(async (req, res) => {

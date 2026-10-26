@@ -106,6 +106,10 @@ export function AdminUsersPanel() {
                       <p className="break-words font-semibold text-fg">{user.name}</p>
                       <p className="break-all text-sm text-fg-muted">{user.email}</p>
                     </div>
+                    <div className="flex items-center gap-2" aria-label="Platform role">
+                      <span className="text-xs text-fg-muted">Platform role</span>
+                      <Badge>{user.systemRole === 'ADMIN' ? 'System Admin' : 'User'}</Badge>
+                    </div>
                     <Badge variant={user.status === 'ACTIVE' ? 'success' : 'danger'}>
                       {user.status === 'ACTIVE' ? 'Active' : 'Suspended'}
                     </Badge>

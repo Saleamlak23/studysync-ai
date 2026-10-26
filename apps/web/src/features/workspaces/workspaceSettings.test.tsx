@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ApiError, api } from '@/shared/lib/api.js';
+import { clearSession, setSession } from '@/shared/lib/session.js';
 import { WorkspaceSettingsPage } from './pages/WorkspaceSettingsPage.js';
 
 vi.mock('@/shared/lib/api.js', async (importOriginal) => {
@@ -21,18 +22,27 @@ let aiEnabled = false;
 let inviteCreated = false;
 let inviteRevoked = false;
 let currentMemberRole: 'ADMIN' | 'MEMBER' = 'MEMBER';
-let memberRemoved = false;
+let removedMemberId: string | null = null;
+
+const sessionUsers = {
+  OWNER: { id: 'owner-1', name: 'Aster Owner', email: 'owner@example.com', avatarUrl: null, bio: null, systemRole: 'USER' as const },
+  ADMIN: { id: 'admin-1', name: 'Bahir Admin', email: 'admin@example.com', avatarUrl: null, bio: null, systemRole: 'USER' as const },
+  MEMBER: { id: 'member-1', name: 'Chaltu Member', email: 'member@example.com', avatarUrl: null, bio: null, systemRole: 'USER' as const },
+};
 
 function setupApi() {
   vi.mocked(api).mockImplementation(async (path, init) => {
     let result: unknown;
     if (path === '/workspaces/workspace-1') result = { id: 'workspace-1', name: 'StudySync Team', description: 'Course project', myRole: currentRole, aiEnabled };
     else if (path === '/workspaces/workspace-1/members') result = members
-      .filter((member) => !memberRemoved || member.user.id !== 'member-1')
+      .filter((member) => member.user.id !== removedMemberId)
       .map((member) => member.user.id === 'member-1' ? { ...member, role: currentMemberRole } : member);
     else if (path === '/workspaces/workspace-1/invites' && (!init?.method || init.method === 'GET')) result = inviteCreated && !inviteRevoked ? [invite] : [];
     else if (path === '/workspaces/workspace-1/members/member-1' && init?.method === 'PATCH') { currentMemberRole = (init.body as { role: 'ADMIN' | 'MEMBER' }).role; result = { ...members[2], role: currentMemberRole }; }
-    else if (path === '/workspaces/workspace-1/members/member-1' && init?.method === 'DELETE') { memberRemoved = true; result = undefined; }
+    else if (path.startsWith('/workspaces/workspace-1/members/') && init?.method === 'DELETE') {
+      removedMemberId = path.slice('/workspaces/workspace-1/members/'.length);
+      result = undefined;
+    }
     else if (path === '/workspaces/workspace-1/invites' && init?.method === 'POST') { inviteCreated = true; result = { id: invite.id, code: invite.code, expiresAt: null }; }
     else if (path === '/workspaces/workspace-1/invites/invite-1' && init?.method === 'DELETE') { inviteRevoked = true; result = undefined; }
     else if (path === '/workspaces/workspace-1/ai-consent' && init?.method === 'PUT') { aiEnabled = (init.body as { enabled: boolean }).enabled; result = { aiEnabled, aiConsentAt: '2026-10-25T00:00:00.000Z' }; }
@@ -43,6 +53,7 @@ function setupApi() {
 }
 
 function renderSettings() {
+  setSession(sessionUsers[currentRole], 'test-access-token');
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -58,15 +69,19 @@ function renderSettings() {
 
 describe('WorkspaceSettingsPage', () => {
   beforeEach(() => {
-    currentRole = 'OWNER'; aiEnabled = false; inviteCreated = false; inviteRevoked = false; currentMemberRole = 'MEMBER'; memberRemoved = false;
+    currentRole = 'OWNER'; aiEnabled = false; inviteCreated = false; inviteRevoked = false; currentMemberRole = 'MEMBER'; removedMemberId = null;
     vi.clearAllMocks();
     setupApi();
   });
-  afterEach(() => cleanup());
+  afterEach(() => { cleanup(); clearSession(); });
 
   it('TC-WS-03: lets the owner change a member role', async () => {
     renderSettings();
     await screen.findByRole('heading', { name: 'StudySync Team settings' });
+    expect(screen.getByText('Your workspace role:')).toBeInTheDocument();
+    expect(screen.getByText('Assigns roles, manages invites and AI consent, and archives the workspace.')).toBeInTheDocument();
+    expect(screen.getByText(/System Admin is a separate platform role/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Leave workspace' })).not.toBeInTheDocument();
     fireEvent.change(await screen.findByRole('combobox', { name: 'Role for Chaltu Member' }), { target: { value: 'ADMIN' } });
     await waitFor(() => expect(api).toHaveBeenCalledWith('/workspaces/workspace-1/members/member-1', { method: 'PATCH', body: { role: 'ADMIN' } }));
     await waitFor(() => expect(screen.getByRole('combobox', { name: 'Role for Chaltu Member' })).toHaveValue('ADMIN'));
@@ -81,19 +96,44 @@ describe('WorkspaceSettingsPage', () => {
     expect(screen.queryByRole('button', { name: 'Remove Aster Owner' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Archive workspace' })).not.toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Enable AI for this workspace' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Leave workspace' })).toBeInTheDocument();
   });
 
   it('TC-WS-03: hides member-management actions from a regular member', async () => {
     currentRole = 'MEMBER'; renderSettings();
     await screen.findByRole('heading', { name: 'StudySync Team settings' });
     expect(screen.queryByRole('button', { name: 'Create invite link' })).not.toBeInTheDocument();
-    await screen.findByText('Chaltu Member');
+    await screen.findByText('Chaltu Member (you)');
     expect(screen.queryByRole('button', { name: /Remove / })).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: /Role for/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Invite links' })).not.toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Enable AI for this workspace' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Archive workspace' })).not.toBeInTheDocument();
     expect(api).not.toHaveBeenCalledWith('/workspaces/workspace-1/invites');
+    expect(screen.getByRole('button', { name: 'Leave workspace' })).toBeInTheDocument();
+  });
+
+  it('TC-WS-04: lets a member leave after confirmation', async () => {
+    currentRole = 'MEMBER';
+    renderSettings();
+    await screen.findByRole('heading', { name: 'StudySync Team settings' });
+    fireEvent.click(screen.getByRole('button', { name: 'Leave workspace' }));
+    const dialog = screen.getByRole('dialog', { name: 'Leave workspace?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Leave workspace' }));
+    await waitFor(() => expect(api).toHaveBeenCalledWith('/workspaces/workspace-1/members/member-1', { method: 'DELETE' }));
+    expect(await screen.findByText('Workspace list')).toBeInTheDocument();
+  });
+
+  it('TC-WS-04: lets an admin leave without using member-removal controls', async () => {
+    currentRole = 'ADMIN';
+    renderSettings();
+    await screen.findByRole('heading', { name: 'StudySync Team settings' });
+    expect(screen.queryByRole('button', { name: 'Remove Bahir Admin' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Leave workspace' }));
+    const dialog = screen.getByRole('dialog', { name: 'Leave workspace?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Leave workspace' }));
+    await waitFor(() => expect(api).toHaveBeenCalledWith('/workspaces/workspace-1/members/admin-1', { method: 'DELETE' }));
+    expect(await screen.findByText('Workspace list')).toBeInTheDocument();
   });
 
   it('TC-WS-04: asks before an admin removes a non-owner member', async () => {

@@ -2,7 +2,7 @@ import type { Channel, Message, MessagesPage, WorkspaceRole } from '@studysync/s
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AttachButton, FileChip, FilesPanel, type AttachedFile } from '@/features/files';
+import { AttachButton, FileChip, FilesPanel, useWorkspaceFileSummary, type AttachedFile } from '@/features/files';
 import { useWorkspaceSocket } from '@/shared/hooks/useWorkspaceSocket.js';
 import { ApiError } from '@/shared/lib/api.js';
 import { getSocket, useOnReconnect } from '@/shared/lib/socket.js';
@@ -227,6 +227,7 @@ export function ChatPage() {
   const [mutationMessage, setMutationMessage] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [filesOpen, setFilesOpen] = useState(false);
+  const fileSummary = useWorkspaceFileSummary(workspaceId);
   const channelsQuery = useQuery({ queryKey: chatKeys.channels(workspaceId), queryFn: () => getChannels(workspaceId), enabled: Boolean(workspaceId) });
   const roleQuery = useQuery({ queryKey: chatKeys.workspace(workspaceId), queryFn: () => getWorkspaceRole(workspaceId), enabled: Boolean(workspaceId) });
   const membersQuery = useQuery({ queryKey: chatKeys.members(workspaceId), queryFn: () => getMembers(workspaceId), enabled: Boolean(workspaceId) });
@@ -326,7 +327,7 @@ export function ChatPage() {
         </div>}
         <header className="flex flex-wrap items-center gap-3 border-b border-line p-3 sm:p-4">
           <div className="min-w-0 flex-1"><h2 className="truncate text-lg font-semibold text-fg"><span aria-hidden="true"># </span>{activeChannel.name}</h2><p className="text-xs text-fg-muted">Workspace channel</p></div>
-          <button type="button" aria-expanded={filesOpen} aria-controls="workspace-files-panel" onClick={() => setFilesOpen((open) => !open)} className="min-h-11 shrink-0 rounded-md border border-line bg-surface px-3 text-sm font-medium text-fg hover:bg-surface-muted">{filesOpen ? 'Hide files' : 'Files'}</button>
+          <button type="button" aria-expanded={filesOpen} aria-controls="workspace-files-panel" onClick={() => setFilesOpen((open) => !open)} className="min-h-11 shrink-0 rounded-md border border-line bg-surface px-3 text-sm font-medium text-fg hover:bg-surface-muted">{filesOpen ? 'Hide files' : `Files${fileSummary.data ? ` (${fileSummary.data.fileCount})` : ''}`}</button>
           {channels.length > 0 && <label className="sr-only" htmlFor="mobile-channel-select">Choose channel</label>}
           {channels.length > 1 && <select id="mobile-channel-select" value={activeChannel.id} onChange={(event) => { const next = channels.find((channel) => channel.id === event.target.value); if (next) selectChannel(next); }} className="min-h-11 max-w-full rounded-md border border-line bg-surface px-3 text-sm text-fg md:hidden">
             {channels.map((channel) => <option key={channel.id} value={channel.id}># {channel.name}</option>)}

@@ -33,7 +33,11 @@ describe('session provider', () => {
 
     await waitFor(() => expect(screen.getByRole('status').textContent).toBe('yared@example.test'));
     expect(getAccessToken()).toBe('restored-token');
-    expect(fetch).toHaveBeenNthCalledWith(1, '/api/v1/auth/refresh', expect.objectContaining({ method: 'POST', credentials: 'include' }));
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(/\/api\/v1\/auth\/refresh$/),
+      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+    );
   });
 
   it('TC-AUTH-02: enters the signed-out state when no refresh session exists', async () => {

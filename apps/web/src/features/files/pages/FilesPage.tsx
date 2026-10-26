@@ -1,5 +1,7 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { WorkspaceFileSummary } from '@studysync/shared';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useState, type ChangeEvent } from 'react';
+import { useParams } from 'react-router-dom';
 import { ApiError, api, apiBlob } from '@/shared/lib/api.js';
 
 export type WorkspaceFile = {
@@ -15,7 +17,10 @@ export type AttachedFile = Pick<WorkspaceFile, 'id' | 'name' | 'mimeType' | 'siz
 
 const MAX_FILE_BYTES = 5_242_880;
 const PAGE_SIZE = 100;
-const fileKeys = { workspace: (workspaceId: string) => ['files', workspaceId] as const };
+const fileKeys = {
+  workspace: (workspaceId: string) => ['files', workspaceId] as const,
+  summary: (workspaceId: string) => ['files', workspaceId, 'summary'] as const,
+};
 
 function fileError(error: unknown): string {
   return error instanceof ApiError ? error.message : 'The file action could not be completed. Try again.';
@@ -62,7 +67,10 @@ function UploadControl({
     onSuccess: async (file) => {
       setMessage(null);
       onUploaded?.(file);
-      await queryClient.invalidateQueries({ queryKey: fileKeys.workspace(workspaceId) });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: fileKeys.workspace(workspaceId) }),
+        queryClient.invalidateQueries({ queryKey: fileKeys.summary(workspaceId) }),
+      ]);
     },
     onError: (error) => setMessage(fileError(error)),
   });
@@ -112,7 +120,18 @@ export function useUploadFile(workspaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (file: File) => uploadFile(workspaceId, file),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: fileKeys.workspace(workspaceId) }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: fileKeys.workspace(workspaceId) }),
+      queryClient.invalidateQueries({ queryKey: fileKeys.summary(workspaceId) }),
+    ]),
+  });
+}
+
+export function useWorkspaceFileSummary(workspaceId: string) {
+  return useQuery({
+    queryKey: fileKeys.summary(workspaceId),
+    queryFn: () => api<WorkspaceFileSummary>(`/workspaces/${encodeURIComponent(workspaceId)}/files/summary`),
+    enabled: Boolean(workspaceId),
   });
 }
 
@@ -133,6 +152,7 @@ export function FileChip({ file }: { file: AttachedFile }) {
 }
 
 export function FilesPanel({ workspaceId, onClose }: { workspaceId: string; onClose?: () => void }) {
+  const summaryQuery = useWorkspaceFileSummary(workspaceId);
   const filesQuery = useInfiniteQuery({
     queryKey: fileKeys.workspace(workspaceId),
     initialPageParam: undefined as string | undefined,
@@ -146,10 +166,22 @@ export function FilesPanel({ workspaceId, onClose }: { workspaceId: string; onCl
 
   return <section aria-label="Files in this workspace" className="flex h-full min-h-0 flex-col gap-3 rounded-lg border border-line bg-surface p-3 sm:p-4">
     <header className="flex items-center justify-between gap-2">
-      <h2 className="text-sm font-semibold text-fg">Files in this workspace</h2>
+      <h2 className="text-sm font-semibold text-fg">Files in this workspace{summaryQuery.data ? ` (${summaryQuery.data.fileCount})` : ''}</h2>
       {onClose && <button type="button" aria-label="Close files" onClick={onClose} className="min-h-11 rounded-md px-3 text-sm font-medium text-fg hover:bg-surface-muted">Close</button>}
     </header>
     <UploadControl workspaceId={workspaceId} />
+    {summaryQuery.isPending && <p role="status" aria-label="Loading workspace storage" className="text-xs text-fg-muted">Loading storage usage…</p>}
+    {summaryQuery.isError && <div role="alert" className="flex items-center justify-between gap-2 rounded-md border border-danger bg-danger-bg p-2 text-xs text-fg">
+      <p>{fileError(summaryQuery.error)}</p>
+      <button type="button" onClick={() => void summaryQuery.refetch()} disabled={summaryQuery.isFetching} className="min-h-11 shrink-0 rounded-md px-2 font-semibold hover:bg-surface">Try again</button>
+    </div>}
+    {summaryQuery.data && <div className="space-y-1" aria-label="Workspace storage usage">
+      <div className="flex items-center justify-between gap-2 text-xs text-fg-muted">
+        <span>Workspace storage</span>
+        <span>{formatBytes(summaryQuery.data.usedBytes)} of {formatBytes(summaryQuery.data.limitBytes)}</span>
+      </div>
+      <progress aria-label="Workspace storage used" max={summaryQuery.data.limitBytes} value={Math.min(summaryQuery.data.usedBytes, summaryQuery.data.limitBytes)} className="h-2 w-full accent-primary" />
+    </div>}
     {filesQuery.isPending ? <div role="status" aria-label="Loading files" className="space-y-3"><div className="h-16 animate-pulse rounded-md bg-surface-muted" /><div className="h-16 animate-pulse rounded-md bg-surface-muted" /></div> : null}
     {filesQuery.isError ? <div role="alert" className="flex flex-col items-start gap-3 rounded-md border border-danger bg-danger-bg p-3 text-sm text-fg">
       <p>{fileError(filesQuery.error)}</p>
@@ -170,4 +202,9 @@ export function FilesPanel({ workspaceId, onClose }: { workspaceId: string; onCl
 
 export function FilesPage() {
   return <main className="bg-canvas p-6 text-fg"><h1 className="text-xl font-semibold">Files</h1></main>;
+}
+
+export function WorkspaceFilesPage() {
+  const { workspaceId = '' } = useParams<{ workspaceId: string }>();
+  return <main className="h-full min-h-0 p-3 sm:p-5"><FilesPanel workspaceId={workspaceId} /></main>;
 }

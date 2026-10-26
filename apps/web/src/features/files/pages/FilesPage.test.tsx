@@ -13,6 +13,8 @@ function response(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }
 
+const summary = { fileCount: 0, usedBytes: 0, limitBytes: 100 * 1024 * 1024 };
+
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
@@ -20,12 +22,15 @@ afterEach(() => {
 
 describe('files components', () => {
   it('TC-FILE-03: loads an empty workspace file panel', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response([])));
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) =>
+      Promise.resolve(response(String(input).endsWith('/files/summary') ? summary : [])),
+    ));
 
     renderWithQueryClient(<FilesPanel workspaceId="workspace-1" />);
 
     expect(await screen.findByText(/No files yet/)).toBeInTheDocument();
     expect(screen.getByText(/Up to 5 MB/)).toBeInTheDocument();
+    expect(screen.getByText('0 B of 100.0 MB')).toBeInTheDocument();
   });
 
   it.each([
@@ -44,9 +49,14 @@ describe('files components', () => {
   });
 
   it('TC-FILE-03: retries a failed file list request', async () => {
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce(response({ error: { code: 'INTERNAL', message: 'internal detail' } }, 500))
-      .mockResolvedValueOnce(response([]));
+    let listCalls = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      if (String(input).endsWith('/files/summary')) return Promise.resolve(response(summary));
+      listCalls += 1;
+      return Promise.resolve(listCalls === 1
+        ? response({ error: { code: 'INTERNAL', message: 'internal detail' } }, 500)
+        : response([]));
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     renderWithQueryClient(<FilesPanel workspaceId="workspace-1" />);
@@ -54,6 +64,20 @@ describe('files components', () => {
     expect(await screen.findByText('Something went wrong. Try again.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await waitFor(() => expect(screen.getByText(/No files yet/)).toBeInTheDocument());
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('TC-FILE-04: displays file count and workspace storage capacity', async () => {
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) =>
+      Promise.resolve(response(String(input).endsWith('/files/summary')
+        ? { fileCount: 3, usedBytes: 1536, limitBytes: 4096 }
+        : [])),
+    ));
+
+    const { container } = renderWithQueryClient(<FilesPanel workspaceId="workspace-1" />);
+
+    expect(await screen.findByRole('heading', { name: 'Files in this workspace (3)' })).toBeInTheDocument();
+    expect(screen.getByText('1.5 KB of 4.0 KB')).toBeInTheDocument();
+    expect(container.querySelector('progress[aria-label="Workspace storage used"]')).toHaveAttribute('value', '1536');
   });
 });

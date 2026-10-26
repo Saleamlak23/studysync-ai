@@ -8,6 +8,7 @@ import type { RouteObject } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ApiError, api } from '@/shared/lib/api.js';
+import { WorkspaceActions, WorkspaceList } from '@/features/workspaces';
 import { useWorkspaceDashboard } from './api.js';
 
 function formatDate(value: string): string {
@@ -38,11 +39,17 @@ function TaskSection({ title, cards, emptyText }: { title: string; cards: Dashbo
   );
 }
 
-function WorkspaceIntegrationPlaceholder() {
+function PersonalWorkspaceSection() {
   return (
-    <section aria-label="My workspaces" className="border-t border-line pt-5">
-      <h2 className="mb-2 text-base font-semibold text-fg">My workspaces</h2>
-      <p className="rounded-lg border border-dashed border-line-strong bg-surface-muted p-4 text-sm text-fg-muted">Workspace list and creation controls will appear here when the workspace feature is available.</p>
+    <section aria-label="My workspaces" className="space-y-3 border-t border-line pt-5">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-fg">My workspaces</h2>
+          <p className="mt-1 text-sm text-fg-muted">Open a team workspace, create one, or join with an invite link.</p>
+        </div>
+        <WorkspaceActions />
+      </header>
+      <WorkspaceList />
     </section>
   );
 }
@@ -66,14 +73,12 @@ export function PersonalDashboard() {
           <button type="button" className="min-h-11 rounded-md border border-line bg-surface px-4 font-medium text-fg hover:bg-surface-muted" onClick={() => void refetch()} disabled={isFetching}>Try again</button>
         </div>
       ) : (
-        <>
-          <div className="grid min-w-0 gap-6 md:grid-cols-2">
-            <TaskSection title="Assigned to me" cards={data.assignedCards} emptyText="You have no assigned cards yet." />
-            <TaskSection title="Upcoming deadlines" cards={data.upcomingDeadlines} emptyText="You have no upcoming deadlines." />
-          </div>
-          <WorkspaceIntegrationPlaceholder />
-        </>
+        <div className="grid min-w-0 gap-6 md:grid-cols-2">
+          <TaskSection title="Assigned to me" cards={data.assignedCards} emptyText="You have no assigned cards yet." />
+          <TaskSection title="Upcoming deadlines" cards={data.upcomingDeadlines} emptyText="You have no upcoming deadlines." />
+        </div>
       )}
+      <PersonalWorkspaceSection />
     </main>
   );
 }

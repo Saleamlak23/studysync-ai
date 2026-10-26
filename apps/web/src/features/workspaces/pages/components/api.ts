@@ -4,19 +4,15 @@ import {
   createInviteBody,
   setWorkspaceAiConsentBody,
   updateMemberRoleBody,
+  workspaceSummarySchema,
 } from '@studysync/shared';
-import type { WorkspaceRole } from '@studysync/shared';
+import type { WorkspaceRole, WorkspaceSummary as SharedWorkspaceSummary } from '@studysync/shared';
 import { api } from '@/shared/lib/api.js';
 
-export type WorkspaceSummary = {
-  id: string;
-  name: string;
-  description: string | null;
-  myRole: WorkspaceRole;
-};
+export type WorkspaceSummary = SharedWorkspaceSummary;
 
 export type WorkspaceCreated = Pick<WorkspaceSummary, 'id' | 'name' | 'description'>;
-export type WorkspaceSettings = WorkspaceSummary & { aiEnabled: boolean };
+export type WorkspaceSettings = Pick<WorkspaceSummary, 'id' | 'name' | 'description' | 'myRole'> & { aiEnabled: boolean };
 export type WorkspaceMember = {
   user: { id: string; name: string; email: string; avatarUrl: string | null };
   role: WorkspaceRole;
@@ -40,7 +36,7 @@ export const workspaceKeys = {
 export function useWorkspaces() {
   return useQuery({
     queryKey: workspaceKeys.list,
-    queryFn: () => api<WorkspaceSummary[]>('/workspaces'),
+    queryFn: async () => workspaceSummarySchema.array().parse(await api<unknown>('/workspaces')),
   });
 }
 
