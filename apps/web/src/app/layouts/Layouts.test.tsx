@@ -138,6 +138,7 @@ describe('Layouts (NFR-12)', () => {
         <Routes>
           <Route element={<AppShell />}>
             <Route path="/" element={<div>Content</div>} />
+            <Route path="/login" element={<div>Signed out</div>} />
           </Route>
         </Routes>,
       );
@@ -173,6 +174,7 @@ describe('Layouts (NFR-12)', () => {
         <Routes>
           <Route element={<AppShell />}>
             <Route path="/" element={<div>Content</div>} />
+            <Route path="/login" element={<div>Signed out</div>} />
           </Route>
         </Routes>,
       );
@@ -182,6 +184,7 @@ describe('Layouts (NFR-12)', () => {
 
       const signoutButtons = screen.getAllByRole('button', { name: /Sign out/i });
       expect(signoutButtons.length).toBeGreaterThan(0);
+      expect(signoutButtons[0]).toHaveClass('min-h-11', 'min-w-11');
 
       fireEvent.click(signoutButtons[0]);
       expect(sessionModule.signOut).toHaveBeenCalled();

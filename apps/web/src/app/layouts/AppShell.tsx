@@ -147,9 +147,9 @@ export function AppShell() {
         </header>
 
         {/* Scrollable Page Outlet */}
-        <main className="flex-1 min-w-0 overflow-y-auto pb-(--size-bottom-nav) md:pb-0">
+        <div className="flex-1 min-w-0 overflow-y-auto pb-(--size-bottom-nav) md:pb-0">
           <Outlet />
-        </main>
+        </div>
 
         {/* Mobile Bottom Navigation (< md) */}
         <nav

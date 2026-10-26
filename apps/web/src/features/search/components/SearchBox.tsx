@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import type { SearchResult } from '@studysync/shared';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery.js';
 import { ApiError } from '@/shared/lib/api.js';
-import { Button, EmptyState, Spinner } from '@/shared/ui/index.js';
+import { Button, EmptyState, Sheet, Spinner } from '@/shared/ui/index.js';
 import { useWorkspaceSearch } from '../search.api.js';
 
 type SearchBoxProps = { workspaceId: string };
@@ -53,6 +53,7 @@ export function SearchBox({ workspaceId }: SearchBoxProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const mobileInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchButtonRef = useRef<HTMLButtonElement>(null);
   const searchEnabled = !isMobile || mobileOpen;
   const query = useWorkspaceSearch(workspaceId, debouncedValue, searchEnabled);
   const waiting = value.trim().length >= 2 && value.trim() !== debouncedValue.trim();
@@ -67,14 +68,10 @@ export function SearchBox({ workspaceId }: SearchBoxProps) {
     mobileInputRef.current?.focus();
   }, [mobileOpen]);
 
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileOpen(false);
-    };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [mobileOpen]);
+  function handleMobileSearchOpenChange(open: boolean) {
+    setMobileOpen(open);
+    if (!open) mobileSearchButtonRef.current?.focus();
+  }
 
   function clearSearch() {
     setValue('');
@@ -98,11 +95,29 @@ export function SearchBox({ workspaceId }: SearchBoxProps) {
     <div className="relative min-w-0">
       <div className="hidden md:block md:w-72">{searchInput('workspace-search-input', 'workspace-search-results-desktop')}</div>
       {showResults && <div id="workspace-search-results-desktop" role="region" aria-label="Search results" className="absolute left-0 right-0 top-full z-40 mt-2 hidden overflow-hidden rounded-lg border border-line bg-surface shadow-lg md:block md:left-auto md:right-0 md:w-[min(28rem,calc(100vw-2rem))]">{results}</div>}
-      <Button size="lg" className="md:hidden min-w-(--size-touch) px-3" aria-label="Open workspace search" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><Search aria-hidden="true" className="size-5" /></Button>
-      {mobileOpen && <div className="fixed inset-0 z-50 bg-canvas p-3 md:hidden" role="dialog" aria-modal="true" aria-label="Search this workspace">
-        <div className="flex items-center gap-2">{searchInput('workspace-search-mobile-input', 'workspace-search-results-mobile', mobileInputRef)}<Button size="lg" onClick={() => setMobileOpen(false)}>Close</Button></div>
+      <button
+        ref={mobileSearchButtonRef}
+        type="button"
+        className="md:hidden inline-flex min-h-(--size-touch) min-w-(--size-touch) items-center justify-center rounded-md border border-line-strong bg-surface px-3 text-fg hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-focus"
+        aria-label="Open workspace search"
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen(true)}
+      >
+        <Search aria-hidden="true" className="size-5" />
+      </button>
+      <Sheet
+        open={mobileOpen}
+        onOpenChange={handleMobileSearchOpenChange}
+        title="Search this workspace"
+        side="right"
+        className="max-w-none border-0 bg-canvas p-3 shadow-none"
+      >
+        <div className="flex items-center gap-2">
+          {searchInput('workspace-search-mobile-input', 'workspace-search-results-mobile', mobileInputRef)}
+          <Button size="lg" onClick={() => setMobileOpen(false)}>Close</Button>
+        </div>
         {showResults && <div id="workspace-search-results-mobile" role="region" aria-label="Search results" className="mt-2 overflow-hidden rounded-lg border border-line bg-surface">{results}</div>}
-      </div>}
+      </Sheet>
     </div>
   );
 }

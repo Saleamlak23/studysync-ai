@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import {
   closestCorners,
   DndContext,
@@ -201,20 +201,40 @@ export function BoardPage() {
         <>
           <div className="md:hidden">
             <div role="tablist" aria-label="Board lists" className="flex gap-2 overflow-x-auto pb-2">
-              {lists.map((list) => (
-                <button
-                  key={list.id}
-                  id={`board-tab-${list.id}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={selectedList?.id === list.id}
-                  aria-controls="board-list-panel"
-                  onClick={() => setSelectedListId(list.id)}
-                  className={`min-h-(--size-touch) shrink-0 rounded-md border px-3 text-sm font-medium ${selectedList?.id === list.id ? 'border-primary-soft-line bg-primary-soft text-primary' : 'border-line bg-surface text-fg-muted'}`}
-                >
-                  {list.name} ({list.cards.length})
-                </button>
-              ))}
+              {lists.map((list, index) => {
+                const isSelected = selectedList?.id === list.id;
+                const selectListByKeyboard = (event: KeyboardEvent<HTMLButtonElement>) => {
+                  let nextIndex = index;
+                  if (event.key === 'ArrowRight') nextIndex = (index + 1) % lists.length;
+                  else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + lists.length) % lists.length;
+                  else if (event.key === 'Home') nextIndex = 0;
+                  else if (event.key === 'End') nextIndex = lists.length - 1;
+                  else return;
+
+                  event.preventDefault();
+                  const nextList = lists[nextIndex];
+                  if (!nextList) return;
+                  setSelectedListId(nextList.id);
+                  document.getElementById(`board-tab-${nextList.id}`)?.focus();
+                };
+
+                return (
+                  <button
+                    key={list.id}
+                    id={`board-tab-${list.id}`}
+                    type="button"
+                    role="tab"
+                    tabIndex={isSelected ? 0 : -1}
+                    aria-selected={isSelected}
+                    aria-controls="board-list-panel"
+                    onClick={() => setSelectedListId(list.id)}
+                    onKeyDown={selectListByKeyboard}
+                    className={`min-h-(--size-touch) shrink-0 rounded-md border px-3 text-sm font-medium ${isSelected ? 'border-primary-soft-line bg-primary-soft text-primary' : 'border-line bg-surface text-fg-muted'}`}
+                  >
+                    {list.name} ({list.cards.length})
+                  </button>
+                );
+              })}
             </div>
             {selectedList && (
               <div id="board-list-panel" role="tabpanel" aria-labelledby={`board-tab-${selectedList.id}`}>
