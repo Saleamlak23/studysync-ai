@@ -147,6 +147,7 @@ Defined in `.env.example`. Never commit a real `.env` file.
 | `FILE_MAX_BYTES`, `WORKSPACE_STORAGE_CAP_BYTES` | API | Upload limits (5 MB per file, 100 MB per workspace by default) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | API | Optional; use `127.0.0.1:1025` with blank credentials for local Mailpit testing |
 | `VITE_API_URL` | Web | Base URL of the API |
+| `VITE_API_ORIGIN` | Web | API origin used by Socket.IO; set this explicitly for production (local development can derive it from an absolute `VITE_API_URL`) |
 
 ## Scripts
 

@@ -53,6 +53,7 @@ describe('socket client', () => {
     cleanup();
     disconnectSocket();
     setAccessToken(null);
+    vi.unstubAllEnvs();
     vi.clearAllMocks();
   });
 
@@ -74,6 +75,15 @@ describe('socket client', () => {
     ]);
     expect(socketStub.disconnect).toHaveBeenCalledOnce();
     expect(socketStub.connect).toHaveBeenCalledOnce();
+  });
+
+  it('TC-CHAT-05: derives the socket origin from an absolute API URL when unset', () => {
+    vi.stubEnv('VITE_API_ORIGIN', '');
+    vi.stubEnv('VITE_API_URL', 'http://localhost:4000/api/v1');
+
+    getSocket();
+
+    expect(io).toHaveBeenCalledWith('http://localhost:4000', expect.any(Object));
   });
 
   it('TC-CHAT-05: notifies listeners after reconnect and removes them on unmount', () => {

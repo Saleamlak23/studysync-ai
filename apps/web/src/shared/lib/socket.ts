@@ -35,10 +35,22 @@ let socket: StudySyncSocket | null = null;
 let unsubscribeFromTokenChanges: (() => void) | null = null;
 const reconnectListeners = new Set<() => void>();
 
+function getSocketOrigin(): string | undefined {
+  if (import.meta.env.VITE_API_ORIGIN) return import.meta.env.VITE_API_ORIGIN;
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) {
+    const origin = new URL(apiUrl, window.location.origin).origin;
+    if (origin !== window.location.origin) return origin;
+  }
+
+  return undefined;
+}
+
 export function getSocket(): StudySyncSocket {
   if (socket) return socket;
 
-  socket = io(import.meta.env.VITE_API_ORIGIN, {
+  socket = io(getSocketOrigin(), {
     auth: (callback) => callback({ token: getAccessToken() }),
     reconnectionDelayMax: 5000,
   }) as StudySyncSocket;
