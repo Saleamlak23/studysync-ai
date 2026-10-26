@@ -148,7 +148,7 @@ AI-specific errors: AI\_DISABLED (403), AI\_LIMIT\_REACHED (429, with `resetAt`)
 
 | Method and path | Role | Request | Response and notes |
 | --- | --- | --- | --- |
-| GET /workspaces/:id/search | Member | q (min 2 characters), type? (cards, messages, files), limit? | 200 `{ cards[], messages[], files[] }` with snippets; full-text search, membership enforced |
+| GET /workspaces/:id/search | Member | q (min 2 characters), type? (cards, messages, files), limit? | 200 `{ cards[], messages[], files[] }` with plain-text snippets (no HTML highlight markup); full-text search, membership enforced |
 | GET /workspaces/:id/dashboard | Member | none | 200 `{ cardsPerList[], overdue, completed, open, contributions[] }`; creates an empty board if the workspace's board record is missing |
 
 ## 10. System Administration

@@ -86,7 +86,7 @@ This matrix links all 43 Must functional requirements and 15 non-functional requ
 
 | ID | Requirement | SDD | Interface | Data | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FR-SRCH-01 | Full-text search within a workspace | 5.2 | GET /workspaces/:id/search | Card, Message, File | TC-SRCH-01 | Implemented — `feature/search-server-fulltext`; TC-SRCH-01 passed (`apps/api/src/modules/search/search.test.ts`) |
+| FR-SRCH-01 | Full-text search within a workspace | 5.2 | GET /workspaces/:id/search | Card, Message, File | TC-SRCH-01 | Implemented — plain-text snippets and dismissible search panel verified in `apps/api/src/modules/search/search.test.ts` and `apps/web/src/features/search/components/SearchBox.test.tsx` |
 | FR-ANA-01 | Workspace progress dashboard | 4 | GET /workspaces/:id/dashboard | Card, List | TC-ANA-01 | Not started |
 | FR-ANA-02 | Personal view of assigned cards and deadlines | 4 | GET /me/dashboard | Card, CardAssignee | TC-PROF-02 (shared) | Implemented — TC-PROF-02 added; execution blocked because local PostgreSQL migration setup failed |
 | FR-ADM-01 | List, search, suspend and reactivate users | 4 | GET /admin/users; PATCH /admin/users/:id | User | TC-ADM-01 | Passed — API permissions/actions in `apps/api/src/modules/admin/admin.test.ts`; admin UI and distinct platform-role display in `apps/web/src/features/admin/admin.test.tsx` |

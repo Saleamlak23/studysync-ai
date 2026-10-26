@@ -45,8 +45,10 @@ describe('workspace search', () => {
     expect(result.status).toBe(200);
     expect(result.body.cards.map((row: { id: string }) => row.id)).toEqual([card.id]);
     expect(result.body.cards[0].snippet).toContain('orchid');
+    expect(result.body.cards[0].snippet).not.toMatch(/<\/?[a-z][^>]*>/i);
     expect(result.body.messages.map((row: { id: string }) => row.id)).toEqual([message.id]);
     expect(result.body.messages[0].snippet).toContain('orchid');
+    expect(result.body.messages[0].snippet).not.toMatch(/<\/?[a-z][^>]*>/i);
     expect(result.body.files).toEqual([{ id: file.id, name: file.name }]);
     expect(JSON.stringify(result.body)).not.toContain(foreignCard.id);
 

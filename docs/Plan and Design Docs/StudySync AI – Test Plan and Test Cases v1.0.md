@@ -126,7 +126,7 @@ AI tests use the mocked provider unless marked manual.
 
 | ID | Req | Steps | Expected result | Type |
 | --- | --- | --- | --- | --- |
-| TC-SRCH-01 | FR-SRCH-01 | Search a card title, description, message and file name; search content from another workspace; a 1-character query | Matches with snippets; nothing from other workspaces; short query 400 | I |
+| TC-SRCH-01 | FR-SRCH-01 | Search a card title, description, message and file name; search content from another workspace; a 1-character query; dismiss the prompt/results by interacting outside the search; inspect snippets for HTML tags | Matches with plain-text snippets; nothing from other workspaces; short query 400; search panel closes outside; snippets contain no HTML tags | I |
 | TC-ANA-01 | FR-ANA-01 | Seed cards across lists, some overdue, some in the last list; GET dashboard; repeat with the board record removed | Counts per list, overdue, completed and open match the seed; a missing board is recreated and returns empty aggregates | I |
 | TC-ADM-01 | FR-ADM-01 | System Admin lists, searches, suspends and reactivates; a normal user tries | Works for System Admin; others 403 | I |
 | TC-ADM-02 | FR-ADM-02 | View AI usage with filters; read and change the limits with GET and PUT /admin/ai-limits, then use up the new limit | Totals match request logs; invalid values 400; the new limits apply at once and survive a restart | I |

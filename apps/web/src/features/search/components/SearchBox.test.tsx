@@ -11,8 +11,8 @@ vi.mock('@/shared/lib/api.js', async (importOriginal) => {
 });
 
 const results = {
-  cards: [{ id: '11111111-1111-4111-8111-111111111111', title: 'Orchid plan', snippet: 'Plan the orchid report' }],
-  messages: [{ id: '22222222-2222-4222-8222-222222222222', snippet: 'Discuss orchid research' }],
+  cards: [{ id: '11111111-1111-4111-8111-111111111111', title: 'Orchid plan', snippet: 'Plan the <b>orchid</b> &lt;i&gt;report&lt;/i&gt;' }],
+  messages: [{ id: '22222222-2222-4222-8222-222222222222', snippet: 'Discuss <b>orchid</b> research' }],
   files: [{ id: '33333333-3333-4333-8333-333333333333', name: 'orchid-notes.txt' }],
 };
 
@@ -64,6 +64,7 @@ describe('SearchBox', () => {
     expect(screen.getByRole('link', { name: /Orchid plan/ })).toHaveAttribute('href', '/w/workspace-1/board');
     expect(screen.getByRole('link', { name: /Discuss orchid research/ })).toHaveAttribute('href', '/w/workspace-1/chat');
     expect(screen.getByRole('link', { name: /orchid-notes.txt/ })).toHaveAttribute('href', '/w/workspace-1/chat');
+    expect(screen.queryByText(/<\/?b>|&lt;\/?i&gt;/)).not.toBeInTheDocument();
   });
 
   it('TC-SRCH-01: shows a no-results state for an empty response', async () => {
@@ -81,10 +82,41 @@ describe('SearchBox', () => {
     renderSearchBox();
     const input = screen.getByRole('searchbox', { name: 'Search cards, messages, files' });
     fireEvent.focus(input);
+    expect(screen.queryByText('Enter at least 2 characters to search this workspace.')).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: 'o' } });
     expect(screen.getByText('Enter at least 2 characters to search this workspace.')).toBeInTheDocument();
     fireEvent.change(input, { target: { value: 'orchid' } });
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 350)); });
     expect(screen.getByRole('status', { name: 'Searching' })).toBeInTheDocument();
+  });
+
+  it('TC-SRCH-01: dismisses the search panel when focus or pointer moves outside', async () => {
+    vi.mocked(api).mockResolvedValue(results);
+    render(<>
+      <button type="button">Other control</button>
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })}>
+        <MemoryRouter><SearchBox workspaceId="workspace-1" /></MemoryRouter>
+      </QueryClientProvider>
+    </>);
+    const input = screen.getByRole('searchbox', { name: 'Search cards, messages, files' });
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'o' } });
+    expect(screen.getByText('Enter at least 2 characters to search this workspace.')).toBeInTheDocument();
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Other control' }));
+    expect(screen.queryByRole('region', { name: 'Search results' })).not.toBeInTheDocument();
+
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'orchid' } });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 350)); });
+    expect(await screen.findByText('Orchid plan')).toBeInTheDocument();
+
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Other control' }));
+    expect(screen.queryByRole('region', { name: 'Search results' })).not.toBeInTheDocument();
+
+    fireEvent.focus(input);
+    expect(screen.getByRole('region', { name: 'Search results' })).toBeInTheDocument();
+    fireEvent.focus(screen.getByRole('button', { name: 'Other control' }));
+    expect(screen.queryByRole('region', { name: 'Search results' })).not.toBeInTheDocument();
   });
 
   it('TC-SRCH-01: displays a friendly request error and retries it', async () => {
