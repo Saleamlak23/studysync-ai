@@ -106,6 +106,27 @@ describe('Layouts (NFR-12)', () => {
       expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
     });
 
+    it('renders workspace tabs in the top header beside notifications', async () => {
+      renderWithProviders(
+        <Routes>
+          <Route element={<AppShell />}>
+            <Route path="/w/:workspaceId" element={<WorkspaceLayout />}>
+              <Route path="settings" element={<div>Workspace settings content</div>} />
+            </Route>
+          </Route>
+        </Routes>,
+        ['/w/ws-100/settings'],
+      );
+
+      const tabs = screen.getByRole('navigation', { name: 'Workspace tabs' });
+      const header = tabs.closest('header');
+      expect(header).not.toBeNull();
+      expect(within(tabs).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
+      expect(await within(tabs).findByRole('link', { name: 'Files (2)' })).toHaveAttribute('href', '/w/ws-100/files');
+      expect(within(tabs).getByRole('link', { name: 'Settings' })).toHaveAttribute('aria-current', 'page');
+      expect(within(header!).getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
+    });
+
     it('TC-PROF-01: opens the profile route from the desktop identity control', async () => {
       renderWithProviders(
         <Routes>
@@ -195,7 +216,7 @@ describe('Layouts (NFR-12)', () => {
   });
 
   describe('WorkspaceLayout', () => {
-    it('renders workspace dashboard inside the layout with workspace navigation', async () => {
+    it('renders workspace dashboard inside the layout with mobile navigation', async () => {
       renderWithProviders(
         <Routes>
           <Route path="/w/:workspaceId" element={<WorkspaceLayout />}>
@@ -206,19 +227,14 @@ describe('Layouts (NFR-12)', () => {
       );
 
       expect(screen.getByText('Workspace dashboard content')).toBeInTheDocument();
-      const tabs = screen.getByRole('navigation', { name: 'Workspace tabs' });
       const mobileNav = screen.getByRole('navigation', { name: 'Workspace mobile navigation' });
-      expect(within(tabs).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
-      expect(within(tabs).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
-      expect(within(tabs).getByRole('link', { name: /Files/ })).toHaveAttribute('href', '/w/ws-100/files');
-      expect(within(tabs).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
       expect(within(mobileNav).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
       expect(within(mobileNav).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
       expect(within(mobileNav).getByRole('link', { name: /Files/ })).toHaveAttribute('href', '/w/ws-100/files');
       expect(within(mobileNav).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
     });
 
-    it('renders workspace navigation tabs and docked AI assistant landmarks', async () => {
+    it('renders mobile navigation and docked AI assistant landmarks', async () => {
       renderWithProviders(
         <Routes>
           <Route path="/w/:workspaceId" element={<WorkspaceLayout />}>
@@ -229,14 +245,6 @@ describe('Layouts (NFR-12)', () => {
       );
 
       expect(screen.getByText('Board Content')).toBeInTheDocument();
-
-      const tabs = screen.getByRole('navigation', { name: 'Workspace tabs' });
-      expect(tabs).toBeInTheDocument();
-      expect(within(tabs).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
-      expect(within(tabs).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
-      expect(await within(tabs).findByRole('link', { name: 'Files (2)' })).toHaveAttribute('href', '/w/ws-100/files');
-      expect(within(tabs).getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/w/ws-100');
-      expect(within(tabs).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
       const mobileNav = screen.getByRole('navigation', { name: 'Workspace mobile navigation' });
       expect(within(mobileNav).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
       expect(within(mobileNav).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');

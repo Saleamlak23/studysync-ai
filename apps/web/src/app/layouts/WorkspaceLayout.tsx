@@ -1,4 +1,4 @@
-import { FileText, Kanban, MessageSquare, Settings, Sparkles, LayoutDashboard } from 'lucide-react';
+import { FileText, Kanban, MessageSquare, Settings, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink, Outlet, useParams } from 'react-router-dom';
 import { AiPanel } from '@/features/ai';
@@ -20,85 +20,9 @@ export function WorkspaceLayout() {
     <div className="relative flex h-full w-full overflow-hidden pb-(--size-bottom-nav) md:pb-0">
       {/* Workspace central area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Workspace sub-navigation & search bar */}
-        <div className="shrink-0 border-b border-line bg-surface px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
-          <nav
-            aria-label="Workspace tabs"
-            className="hidden md:flex items-center gap-1 overflow-x-auto py-1 scrollbar-none"
-          >
-            <NavLink
-              to={`${base}/board`}
-              className={({ isActive }) =>
-                `inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-11 ${
-                  isActive
-                    ? 'bg-primary-soft text-primary'
-                    : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
-                }`
-              }
-            >
-              <Kanban className="size-4 shrink-0" strokeWidth={1.75} />
-              <span>Board</span>
-            </NavLink>
-
-            <NavLink
-              to={`${base}/chat`}
-              className={({ isActive }) =>
-                `inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-11 ${
-                  isActive
-                    ? 'bg-primary-soft text-primary'
-                    : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
-                }`
-              }
-            >
-              <MessageSquare className="size-4 shrink-0" strokeWidth={1.75} />
-              <span>Chat</span>
-            </NavLink>
-
-            <NavLink
-              to={`${base}/files`}
-              className={({ isActive }) =>
-                `inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-11 ${
-                  isActive
-                    ? 'bg-primary-soft text-primary'
-                    : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
-                }`
-              }
-            >
-              <FileText className="size-4 shrink-0" strokeWidth={1.75} />
-              <span>Files{fileCount === undefined ? '' : ` (${fileCount})`}</span>
-            </NavLink>
-
-            <NavLink
-              to={base}
-              end
-              className={({ isActive }) =>
-                `inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-11 ${
-                  isActive
-                    ? 'bg-primary-soft text-primary'
-                    : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
-                }`
-              }
-            >
-              <LayoutDashboard className="size-4 shrink-0" strokeWidth={1.75} />
-              <span>Dashboard</span>
-            </NavLink>
-
-            <NavLink
-              to={`${base}/settings`}
-              className={({ isActive }) =>
-                `inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-11 ${
-                  isActive
-                    ? 'bg-primary-soft text-primary'
-                    : 'text-fg-muted hover:bg-surface-muted hover:text-fg'
-                }`
-              }
-            >
-              <Settings className="size-4 shrink-0" strokeWidth={1.75} />
-              <span>Settings</span>
-            </NavLink>
-          </nav>
-
-          <div className="flex items-center gap-2.5 ml-auto">
+        {/* Workspace search and assistant controls */}
+        <div className="shrink-0 border-b border-line bg-surface px-4 py-2.5 sm:px-6">
+          <div className="flex items-center justify-end gap-2.5">
             <SearchBox workspaceId={workspaceId} />
 
             {/* AI button on tablet/mobile */}

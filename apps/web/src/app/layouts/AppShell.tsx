@@ -1,20 +1,24 @@
-import { LayoutDashboard, LogOut, Shield, Sparkles, FolderKanban, UserRound } from 'lucide-react';
+import { LayoutDashboard, LogOut, Sparkles, FolderKanban, UserRound } from 'lucide-react';
 import { useState } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useWorkspaceFileSummary } from '@/features/files';
 import { NotificationBell } from '@/features/notifications';
 import { WorkspaceActions, useWorkspaces } from '@/features/workspaces';
 import { signOut, useSession } from '@/shared/lib/session.js';
 import { Avatar } from '@/shared/ui/index.js';
+import { WorkspaceTabs } from './WorkspaceTabs.js';
 
 export function AppShell() {
   const session = useSession();
   const navigate = useNavigate();
   const location = useLocation();
+  const workspaceId = useMatch('/w/:workspaceId/*')?.params.workspaceId ?? '';
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const user = session.status === 'authenticated' ? session.user : null;
   const isAdmin = user?.systemRole === 'ADMIN';
   const isWorkspaceRoute = location.pathname.startsWith('/w/');
   const workspacesQuery = useWorkspaces();
+  const fileSummary = useWorkspaceFileSummary(workspaceId);
 
   const handleSignOut = async () => {
     setAccountMenuOpen(false);
@@ -151,8 +155,8 @@ export function AppShell() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Header */}
-        <header className="h-(--size-header) shrink-0 border-b border-line bg-surface flex items-center justify-between px-4 sm:px-6 z-10">
-          <div className="flex items-center gap-3">
+        <header className="h-(--size-header) shrink-0 border-b border-line bg-surface flex min-w-0 items-center justify-between gap-2 px-4 sm:px-6 z-10">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <Link
               to="/"
               className="flex md:hidden items-center gap-2 font-bold text-base text-primary tracking-tight"
@@ -160,9 +164,14 @@ export function AppShell() {
               <Sparkles className="size-4 text-ai" strokeWidth={1.75} />
               <span>StudySync AI</span>
             </Link>
+            {workspaceId && (
+              <div className="hidden min-w-0 flex-1 md:flex">
+                <WorkspaceTabs workspaceId={workspaceId} fileCount={fileSummary.data?.fileCount} />
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {user && <div className="relative md:hidden">
               <button
                 type="button"
