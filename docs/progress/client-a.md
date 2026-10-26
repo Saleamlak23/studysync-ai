@@ -126,11 +126,11 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### A11 · Responsive and accessibility pass
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/responsive-client-polish`
 - Depends on: A03 to A10
 - Requirements: NFR-03, NFR-12
 - Tests: TC-NFR-03 (Lighthouse), TC-NFR-12 (usability notes)
 - Read first: AGENTS.md 10.9, 11.7; docs/TEST-PLAN.md section 6; all wireframes
 - Task: 360 px pass on every screen of my features, keyboard and screen-reader checks, route-level code splitting, consistent loading, empty and error states.
-- Done in: (branch, date)
+- Done in: `feature/responsive-client-polish`, 2026-10-26

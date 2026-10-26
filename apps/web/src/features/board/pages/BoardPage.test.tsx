@@ -180,12 +180,20 @@ describe('BoardPage', () => {
     await waitFor(() => expect(moveMutation).toHaveBeenCalledWith({ listId: 'list-3', afterListId: 'list-1' }));
   });
 
-  it('TC-TASK-01: shows one selected list in the mobile tab panel', () => {
+  it('TC-NFR-12: supports accessible mobile list tabs and arrow-key selection', () => {
     renderBoard();
     const tablist = screen.getByRole('tablist', { name: 'Board lists' });
-    fireEvent.click(within(tablist).getByRole('tab', { name: 'In progress (0)' }));
+    const selectedTab = within(tablist).getByRole('tab', { name: 'To do (1)' });
+    expect(selectedTab).toHaveAttribute('aria-selected', 'true');
+    expect(selectedTab).toHaveClass('min-h-(--size-touch)');
+
+    const nextTab = within(tablist).getByRole('tab', { name: 'In progress (0)' });
+    selectedTab.focus();
+    fireEvent.keyDown(selectedTab, { key: 'ArrowRight' });
+    expect(nextTab).toHaveFocus();
     const panel = screen.getByRole('tabpanel');
     expect(panel).toHaveAttribute('aria-labelledby', 'board-tab-list-2');
+    expect(nextTab).toHaveAttribute('aria-selected', 'true');
     expect(within(panel).getByRole('heading', { name: 'In progress' })).toBeInTheDocument();
     expect(within(panel).getByText('No cards in this list yet.')).toBeInTheDocument();
   });

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, api } from '@/shared/lib/api.js';
@@ -103,9 +103,14 @@ describe('SearchBox', () => {
   it('TC-SRCH-01: opens the mobile search dialog and closes it on Escape', async () => {
     vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query === '(max-width: 767px)', media: query, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
     renderSearchBox();
-    fireEvent.click(screen.getByRole('button', { name: 'Open workspace search' }));
-    expect(screen.getByRole('dialog', { name: 'Search this workspace' })).toBeInTheDocument();
+    const openButton = screen.getByRole('button', { name: 'Open workspace search' });
+    openButton.focus();
+    fireEvent.click(openButton);
+    const dialog = screen.getByRole('dialog', { name: 'Search this workspace' });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByRole('searchbox', { name: 'Search cards, messages, files' })).toHaveFocus();
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('dialog', { name: 'Search this workspace' })).not.toBeInTheDocument();
+    expect(openButton).toHaveFocus();
   });
 });

@@ -5,6 +5,7 @@ export { Card, type CardVariant } from './Card.js';
 export { Dialog } from './Dialog.js';
 export { EmptyState } from './EmptyState.js';
 export { Input } from './Input.js';
+export { PageLoading } from './PageLoading.js';
 export { Sheet, type SheetSide } from './Sheet.js';
 export { Skeleton } from './Skeleton.js';
 export { Spinner } from './Spinner.js';
