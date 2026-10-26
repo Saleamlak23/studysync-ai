@@ -39,7 +39,7 @@ async function ensureListInWorkspace(workspaceId: string, listId: string) {
 export async function askAI(
   userId: string,
   workspaceId: string,
-  input: { question: string; context: ContextItem[] },
+  input: { question: string; context: ContextItem[]; history?: Array<{ role: 'user' | 'assistant'; content: string }> },
   providers?: ProviderSet,
 ) {
   await prepareAiRequest(userId, workspaceId);
@@ -48,9 +48,9 @@ export async function askAI(
     userId,
     workspaceId,
     feature: 'ASK' satisfies AIFeature,
-    prompt: askPrompt(input.question, context.text),
+    prompt: askPrompt(input.question, context.text, input.history),
     validateOutput: validatedText,
-    repairPrompt: (text) => `${askPrompt(input.question, context.text)}\nThe previous answer was empty. Provide a useful answer. Previous output: ${wrapUntrusted(text)}`,
+    repairPrompt: (text) => `${askPrompt(input.question, context.text, input.history)}\nThe previous answer was empty. Provide a useful answer. Previous output: ${wrapUntrusted(text)}`,
   }, providers);
   return { answer: withTruncationNote(completion.text, context.truncated), provider: completion.provider };
 }

@@ -7,9 +7,15 @@ export const aiContextItem = z.discriminatedUnion('type', [
   z.object({ type: z.literal('message_range'), channelId: id, fromId: id, toId: id }),
 ]);
 
+export const aiConversationMessage = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string().min(1).max(4000),
+});
+
 export const aiAskBody = z.object({
   question: z.string().trim().min(1).max(10_000),
   context: z.array(aiContextItem).min(1),
+  history: z.array(aiConversationMessage).max(10).optional(),
 });
 
 export const aiSummarizeBody = z.object({

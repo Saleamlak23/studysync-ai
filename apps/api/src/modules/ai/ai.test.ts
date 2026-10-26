@@ -176,6 +176,21 @@ describe('AI feature endpoints', () => {
     expect(primary.prompts[0]).toContain('<user_content>');
     expect(primary.prompts[0]).toContain('< /user_content>');
 
+    const followup = await request(api).post(`/api/v1/workspaces/${owner.workspaceId}/ai/ask`).set(auth(owner.token))
+      .send({
+        question: 'Can you explain the first step?',
+        context: [{ type: 'card', id: card.id }],
+        history: [
+          { role: 'user', content: 'What task is this?' },
+          { role: 'assistant', content: 'It is about reviewing requirements.' },
+        ],
+      });
+    expect(followup.status).toBe(200);
+    expect(primary.prompts.at(-1)).toContain('user: What task is this?');
+    expect(primary.prompts.at(-1)).toContain('assistant: It is about reviewing requirements.');
+    expect(primary.prompts.at(-1)).toContain('Can you explain the first step?');
+    expect(primary.prompts.at(-1)).toContain('clearly label suggestions or inferences');
+
     const outsider = await createAiFixture(api);
     const nonMember = await request(api).post(`/api/v1/workspaces/${owner.workspaceId}/ai/ask`).set(auth(outsider.token)).send(body);
     expect(nonMember.status).toBe(404);

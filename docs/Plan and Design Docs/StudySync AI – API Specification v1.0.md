@@ -137,7 +137,7 @@ All AI endpoints require Member role, a workspace with `aiEnabled` true, and ava
 
 | Method and path | Request | Response |
 | --- | --- | --- |
-| POST /workspaces/:id/ai/ask | question, context: \[{ type: card, message\_range or file; ids or range }\] | 200 `{ answer, provider }` |
+| POST /workspaces/:id/ai/ask | question, context: \[{ type: card, message\_range or file; ids or range }\], optional history: up to 10 `{ role: user or assistant, content }` messages (max 4,000 characters each) for follow-ups; selected workspace content remains the source for workspace facts | 200 `{ answer, provider }` |
 | POST /workspaces/:id/ai/summarize | target: { type: message\_range, card or file; ... } | 200 `{ summary, provider }`; files: TXT, PDF, DOCX within the size cap |
 | POST /workspaces/:id/ai/breakdown | description, listId | 200 `{ items: [{ title, description, priority, dueDate? }], provider }`; preview only, nothing is created |
 | POST /workspaces/:id/ai/breakdown/confirm | listId, items (edited by the user) | 201 `[Card]`; the server re-validates every item, creates all cards in one transaction and broadcasts the board events |

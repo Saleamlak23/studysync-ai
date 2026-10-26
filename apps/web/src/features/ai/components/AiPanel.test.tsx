@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/lib/api.js';
 import { aiContext } from '@/shared/stores/aiContext.js';
 import { AiPanel } from '@/features/ai';
+import { clearAiConversation } from '../conversation.js';
 
 const { apiMock } = vi.hoisted(() => ({ apiMock: vi.fn() }));
 vi.mock('@/shared/lib/api.js', async (importOriginal) => ({
@@ -20,6 +21,7 @@ function renderPanel(aiEnabled = true) {
 afterEach(() => {
   cleanup();
   aiContext.clear();
+  clearAiConversation('workspace-1');
   apiMock.mockReset();
 });
 
@@ -30,7 +32,7 @@ describe('AiPanel', () => {
     expect(screen.getByText(/sent to third-party AI providers, whose terms apply/)).toBeInTheDocument();
     expect(screen.getByText(/Select a card, message range or file/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ask AI' })).toBeDisabled();
-    expect(screen.getByText('Select workspace content and enter a question to enable Ask AI.')).toBeInTheDocument();
+    expect(screen.getByText('Select workspace content and enter a question to enable sending.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Summarize selected item' })).toBeDisabled();
   });
 
@@ -64,6 +66,40 @@ describe('AiPanel', () => {
         context: [
           { type: 'card', id: 'card-1' },
           { type: 'message_range', channelId: 'channel-1', fromId: 'message-1', toId: 'message-2' },
+        ],
+      },
+    });
+  });
+
+  it('TC-AI-02: keeps readable answers in the conversation and sends follow-up history', async () => {
+    aiContext.select([{ type: 'card', id: 'card-1', label: 'Plan the release' }]);
+    apiMock
+      .mockResolvedValueOnce({ answer: 'First, prepare the release.\n\n- Review the changes\n- Run the tests', provider: 'groq' })
+      .mockResolvedValueOnce({ answer: 'Review the changes before merging.', provider: 'gemini' });
+    renderPanel();
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Ask a question' }), { target: { value: 'How do I start?' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Ask AI' }));
+
+    expect(await screen.findByRole('region', { name: 'AI answer' })).toBeInTheDocument();
+    expect(screen.getByText('Review the changes')).toBeInTheDocument();
+    expect(screen.getByText('Run the tests')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Ask a question' }), { target: { value: 'What should I review?' } });
+    expect(screen.getByRole('button', { name: 'Send follow-up' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Send follow-up' }));
+
+    expect(await screen.findByText('Review the changes before merging.')).toBeInTheDocument();
+    expect(screen.getByRole('log', { name: 'AI conversation' })).toHaveTextContent('How do I start?');
+    expect(screen.getByRole('log', { name: 'AI conversation' })).toHaveTextContent('What should I review?');
+    expect(apiMock).toHaveBeenLastCalledWith('/workspaces/workspace-1/ai/ask', {
+      method: 'POST',
+      body: {
+        question: 'What should I review?',
+        context: [{ type: 'card', id: 'card-1' }],
+        history: [
+          { role: 'user', content: 'How do I start?' },
+          { role: 'assistant', content: 'First, prepare the release.\n\n- Review the changes\n- Run the tests' },
         ],
       },
     });

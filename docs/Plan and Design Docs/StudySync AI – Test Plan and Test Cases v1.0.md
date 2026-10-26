@@ -113,7 +113,7 @@ AI tests use the mocked provider unless marked manual.
 | ID | Req | Steps | Expected result | Type |
 | --- | --- | --- | --- | --- |
 | TC-AI-01 | FR-AI-01 | Open a workspace with AI on and with AI off | Panel usable when on; disabled or hidden when off | E2E, M |
-| TC-AI-02 | FR-AI-02 | Ask with a selected card; with a card from another workspace | Answer built only from selected content; foreign item rejected | I |
+| TC-AI-02 | FR-AI-02 | Ask with a selected card and ask a follow-up; with a card from another workspace | Readable conversation continues from bounded prior turns and selected content; foreign item rejected | I, E2E |
 | TC-AI-03 | FR-AI-03 | Summarize a chat range, a card, TXT, PDF and DOCX files; an oversized and an unsupported file | Summary returned; clear error for bad files | I |
 | TC-AI-04 | FR-AI-04 | Breakdown, edit the preview, confirm; confirm with an invalid item; mock returns invalid JSON | Preview creates nothing; confirm creates all cards at once and broadcasts; invalid item 400; bad output retried once then 502 | I, E2E |
 | TC-AI-05 | FR-AI-05 | Primary provider times out; then both fail | Fallback used and logged; both failing gives 502 AI\_UNAVAILABLE | U |

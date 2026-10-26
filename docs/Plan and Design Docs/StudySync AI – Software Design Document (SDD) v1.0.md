@@ -139,6 +139,8 @@ A moved card gets the average of its new neighbors' positions; at the start or e
 
 Structure: AI controller, AIService (consent check, limit check, context builder, prompt builder, parser), an `AIProvider` interface with GroqProvider and GeminiProvider, and a router that applies a 30-second timeout, one retry and fallback.
 
+The assistant presents an in-memory conversation for the current workspace and selected context. Follow-up requests send at most the last 10 user/assistant messages (4,000 characters each); the API validates and treats the transcript as untrusted input. Workspace context is still loaded server-side from the selected item IDs and remains the source for workspace facts; prior assistant advice may be explained as suggestions, not verified workspace facts. Conversations are not persisted.
+
 Task breakdown flow:
 
 1. Authenticate, check membership and that the workspace owner enabled AI.

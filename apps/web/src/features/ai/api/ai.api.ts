@@ -5,7 +5,8 @@ export type AiContextPayload =
   | { type: 'file'; id: string }
   | { type: 'message_range'; channelId: string; fromId: string; toId: string };
 
-export type AskAiInput = { question: string; context: AiContextPayload[] };
+export type AiConversationMessage = { role: 'user' | 'assistant'; content: string };
+export type AskAiInput = { question: string; context: AiContextPayload[]; history?: AiConversationMessage[] };
 export type SummarizeAiInput = { target: AiContextPayload };
 export type AiAnswer = { answer: string; provider: string };
 export type AiSummary = { summary: string; provider: string };
