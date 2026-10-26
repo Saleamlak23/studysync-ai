@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Shield, Sparkles, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, LogOut, Shield, Sparkles, FolderKanban, UserRound } from 'lucide-react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/features/notifications';
 import { signOut, useSession } from '@/shared/lib/session.js';
@@ -87,13 +87,18 @@ export function AppShell() {
         {/* User profile & sign-out at bottom of sidebar */}
         {user && (
           <div className="p-3 border-t border-line bg-surface-muted/50 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              aria-label="Edit profile"
+              className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 rounded-md text-left hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-primary"
+            >
               <Avatar name={user.name} src={user.avatarUrl} size="sm" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-fg truncate">{user.name}</p>
                 <p className="text-xs text-fg-muted truncate">{user.email}</p>
               </div>
-            </div>
+            </button>
             <button
               type="button"
               onClick={handleSignOut}
@@ -122,14 +127,29 @@ export function AppShell() {
           </div>
 
           <div className="flex items-center gap-2">
+            {user && (
+              <button
+                type="button"
+                onClick={() => navigate('/profile')}
+                aria-label="Edit profile"
+                title="Edit profile"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-fg-muted hover:bg-surface-muted hover:text-fg md:hidden"
+              >
+                {user.avatarUrl ? (
+                  <Avatar name={user.name} src={user.avatarUrl} size="sm" />
+                ) : (
+                  <UserRound className="size-5" strokeWidth={1.75} />
+                )}
+              </button>
+            )}
             <NotificationBell />
           </div>
         </header>
 
         {/* Scrollable Page Outlet */}
-        <main className="flex-1 min-w-0 overflow-y-auto pb-(--size-bottom-nav) md:pb-0">
+        <div className="flex-1 min-w-0 overflow-y-auto pb-(--size-bottom-nav) md:pb-0">
           <Outlet />
-        </main>
+        </div>
 
         {/* Mobile Bottom Navigation (< md) */}
         <nav

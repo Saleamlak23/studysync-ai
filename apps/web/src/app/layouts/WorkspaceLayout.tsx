@@ -82,7 +82,7 @@ export function WorkspaceLayout() {
           </nav>
 
           <div className="flex items-center gap-2.5 ml-auto">
-            <SearchBox />
+            <SearchBox workspaceId={workspaceId} />
 
             {/* AI button on tablet/mobile */}
             <button

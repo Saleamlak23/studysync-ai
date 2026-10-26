@@ -48,9 +48,10 @@ describe('application scaffold', () => {
     });
   });
 
-  it('renders the app with dashboard and shell', async () => {
+  it('TC-NFR-12: renders the app with one main landmark and the shell', async () => {
     render(<App />);
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument();
+    expect(document.querySelectorAll('main')).toHaveLength(1);
   });
 });
