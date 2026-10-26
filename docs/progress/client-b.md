@@ -140,11 +140,11 @@ How to use: see `README.md` in this folder. Task IDs: `S` server, `A` Client A, 
 
 ### B12 · End-to-end demo path
 
-- Status: todo
+- Status: done
 - Suggested branch: `feature/e2e-client-demo-path`
 - Depends on: all A, B and S tasks
 - Requirements: SRS acceptance criteria 1 to 7
-- Tests: TC-AI-01 (E2E), TC-AI-04 (E2E), TC-AI-08 (E2E)
+- Tests: TC-WS-01, TC-WS-02, TC-CHAT-02, TC-FILE-03, TC-NOT-01, TC-TASK-04, TC-AI-01, TC-AI-03, TC-AI-04, TC-AI-08 (E2E)
 - Read first: AGENTS.md 12; docs/TEST-PLAN.md sections 1 and 5.6; docs/SRS.md section 9
 - Task: Playwright with the mocked AI provider: register, create a workspace, add a card, send a chat message, run an AI breakdown and confirm, check the cards appear.
-- Done in: (branch, date)
+- Done in: `feature/e2e-client-demo-path`, 2026-10-26
