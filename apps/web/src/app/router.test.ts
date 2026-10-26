@@ -54,3 +54,10 @@ describe('route-level code splitting', () => {
     expect(collectLayoutRoutes(router.routes)).toHaveLength(4);
   });
 });
+
+describe('route error recovery', () => {
+  it('TC-UX-01: provides an error boundary for each top-level route tree', () => {
+    expect(router.routes).toHaveLength(2);
+    expect(router.routes.every((route) => route.hasErrorBoundary)).toBe(true);
+  });
+});

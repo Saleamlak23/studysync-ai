@@ -149,6 +149,12 @@ AI tests use the mocked provider unless marked manual.
 | TC-NFR-14 | NFR-14 | Delete an account; delete AI history; inspect AI logs | Personal data removed; logs hold metadata only | I |
 | TC-NFR-15 | NFR-15 | Open the consent dialog | Notice names third-party AI providers | M |
 
+## 6.1 Supplemental UI Recovery Test
+
+| ID | Scope | Steps | Expected result | Type |
+| --- | --- | --- | --- | --- |
+| TC-UX-01 | Route error recovery | Trigger a route loader or lazy import failure from both the authentication and authenticated route trees; select each recovery action | Branded error page replaces the framework developer screen; technical details are hidden; retry reloads and dashboard navigation works | I, M |
+
 ## 7. Schedule
 
 | Week | Testing work |

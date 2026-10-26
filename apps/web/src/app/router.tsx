@@ -13,6 +13,7 @@ import { searchRoutes } from '@/features/search';
 import { workspaceRoutes, workspacesRoutes } from '@/features/workspaces';
 import { PageLoading } from '@/shared/ui/index.js';
 import { RequireAuth, RequireSystemAdmin } from './guards/index.js';
+import { RouteErrorPage } from './RouteErrorPage.js';
 
 const AuthLayout = lazy(() => import('./layouts/AuthLayout.js').then(({ AuthLayout: layout }) => ({ default: layout })));
 const AppShell = lazy(() => import('./layouts/AppShell.js').then(({ AppShell: layout }) => ({ default: layout })));
@@ -25,10 +26,12 @@ const lazyLayout = (Layout: LazyExoticComponent<ComponentType>) =>
 export const router = createBrowserRouter([
   {
     element: lazyLayout(AuthLayout),
+    errorElement: <RouteErrorPage />,
     children: authRoutes,
   },
   {
     element: <RequireAuth />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         element: lazyLayout(AppShell),
