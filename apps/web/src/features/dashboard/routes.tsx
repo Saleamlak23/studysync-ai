@@ -159,5 +159,4 @@ export function DashboardPage() { return <PersonalDashboard />; }
 
 export const dashboardRoutes: RouteObject[] = [
   { path: '/', element: createElement(DashboardPage) },
-  { path: '/w/:workspaceId', element: createElement(WorkspaceDashboard) },
 ];

@@ -195,6 +195,29 @@ describe('Layouts (NFR-12)', () => {
   });
 
   describe('WorkspaceLayout', () => {
+    it('renders workspace dashboard inside the layout with workspace navigation', async () => {
+      renderWithProviders(
+        <Routes>
+          <Route path="/w/:workspaceId" element={<WorkspaceLayout />}>
+            <Route index element={<div>Workspace dashboard content</div>} />
+          </Route>
+        </Routes>,
+        ['/w/ws-100'],
+      );
+
+      expect(screen.getByText('Workspace dashboard content')).toBeInTheDocument();
+      const tabs = screen.getByRole('navigation', { name: 'Workspace tabs' });
+      const mobileNav = screen.getByRole('navigation', { name: 'Workspace mobile navigation' });
+      expect(within(tabs).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
+      expect(within(tabs).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
+      expect(within(tabs).getByRole('link', { name: /Files/ })).toHaveAttribute('href', '/w/ws-100/files');
+      expect(within(tabs).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
+      expect(within(mobileNav).getByRole('link', { name: 'Board' })).toHaveAttribute('href', '/w/ws-100/board');
+      expect(within(mobileNav).getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/w/ws-100/chat');
+      expect(within(mobileNav).getByRole('link', { name: /Files/ })).toHaveAttribute('href', '/w/ws-100/files');
+      expect(within(mobileNav).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/w/ws-100/settings');
+    });
+
     it('renders workspace navigation tabs and docked AI assistant landmarks', async () => {
       renderWithProviders(
         <Routes>

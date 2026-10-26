@@ -5,7 +5,7 @@ import { aiRoutes } from '@/features/ai';
 import { authRoutes } from '@/features/auth';
 import { boardRoutes } from '@/features/board';
 import { chatRoutes } from '@/features/chat';
-import { dashboardRoutes } from '@/features/dashboard';
+import { dashboardRoutes, WorkspaceDashboard } from '@/features/dashboard';
 import { filesRoutes, workspaceFilesRoutes } from '@/features/files';
 import { notificationsRoutes } from '@/features/notifications';
 import { profileRoutes } from '@/features/profile';
@@ -47,6 +47,7 @@ export const router = createBrowserRouter([
             path: '/w/:workspaceId',
             element: lazyLayout(WorkspaceLayout),
             children: [
+              { index: true, element: createElement(WorkspaceDashboard) },
               ...workspaceRoutes,
               ...boardRoutes,
               ...chatRoutes,
