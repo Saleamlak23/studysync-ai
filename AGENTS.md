@@ -1328,7 +1328,7 @@ export const useAiContext = () =>
   useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, () => items);
 ```
 
-The AI panel always shows what will be sent ("Context: card Design login page") and a clear button, plus the consent notice. The panel is disabled with an explanation when the workspace has AI off; only the Owner sees the "Enable AI" action (it lives in workspace settings).
+The AI panel shows selected context and a clear button, plus a concise consent notice. The desktop panel is horizontally resizable and collapsible; mobile and tablet use a sheet. The panel is disabled with an explanation when the workspace has AI off; only the Owner sees the "Enable AI" action (it lives in workspace settings).
 
 ### 10.8 Mocks while the backend is not ready (MSW)
 
@@ -1492,7 +1492,7 @@ Desktop uses the sidebar layout; below `md` the sidebar becomes a bottom navigat
 :root {
   /* layout sizes (use with w-(--size-sidebar)) */
   --size-sidebar: 15rem;      /* 240px */
-  --size-ai-panel: 20rem;     /* 320px */
+  --size-ai-panel: 20rem;     /* 320px default; desktop panel can be resized */
   --size-header: 3.5rem;      /* 56px  */
   --size-bottom-nav: 3.5rem;  /* 56px  */
   --size-list: 18rem;         /* 288px board column */
@@ -1623,7 +1623,7 @@ Other primitives follow the same pattern. Class strings:
 | Panel | `rounded-lg border border-line bg-surface p-4` |
 | Dialog | `rounded-lg bg-surface p-5 shadow-lg` (backdrop `bg-stone-900/40`) |
 | Bottom sheet | `rounded-t-xl bg-surface p-4 shadow-lg` |
-| AI panel | `w-(--size-ai-panel) border-l border-ai-soft-line bg-ai-soft p-4` |
+| AI panel | Resizable desktop dock; mobile and tablet use the shared sheet |
 | AI badge | `rounded-sm bg-ai-soft px-2 py-0.5 text-xs font-semibold text-ai` |
 | Priority badge | High `bg-danger-bg text-danger`, Medium `bg-warning-bg text-warning`, Low `bg-surface-muted text-fg-muted` (all `rounded-sm px-2 py-0.5 text-xs font-medium`) |
 | Reconnect banner | `rounded-md bg-warning-bg px-3 py-2 text-xs text-warning` |
@@ -1635,7 +1635,7 @@ Other primitives follow the same pattern. Class strings:
 - **Mobile first.** Breakpoints: `sm` 640, `md` 768, `lg` 1024, `xl` 1280.
 - `< md`: single column, bottom navigation (`h-(--size-bottom-nav)`), top bar `h-(--size-header)`, board shows one list at a time as tabs, AI panel is a bottom sheet opened by a floating lagoon button, dialogs become full-screen sheets.
 - `md` to `< xl`: sidebar `w-(--size-sidebar)`, content fluid, AI panel opens as a right drawer.
-- `>= xl`: AI panel is docked at `w-(--size-ai-panel)`.
+- `>= xl`: AI panel is docked at 20rem by default and can be resized between 17.5rem and 40rem or collapsed to a narrow rail.
 - Content max width on text-heavy pages (settings, admin): `max-w-3xl`. The board uses the full width and scrolls horizontally inside its container, never the page.
 - Tables on mobile become stacked rows; wide content scrolls inside `overflow-x-auto`.
 - Icons: `lucide-react`, 16 or 20 px, `stroke-width` 1.75. Every icon-only button has `aria-label`.

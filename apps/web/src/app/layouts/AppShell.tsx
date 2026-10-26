@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Sparkles, FolderKanban, UserRound } from 'lucide-react';
+import { LayoutDashboard, LogOut, Shield, Sparkles, FolderKanban, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useWorkspaceFileSummary } from '@/features/files';

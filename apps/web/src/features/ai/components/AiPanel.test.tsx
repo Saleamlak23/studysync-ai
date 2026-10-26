@@ -26,14 +26,14 @@ afterEach(() => {
 });
 
 describe('AiPanel', () => {
-  it('TC-AI-02: explains privacy and disables requests until context is selected', () => {
+  it('TC-AI-02: keeps a concise privacy notice and disables requests until context is selected', () => {
     renderPanel();
 
-    expect(screen.getByText(/sent to third-party AI providers, whose terms apply/)).toBeInTheDocument();
-    expect(screen.getByText(/Select a card, message range or file/)).toBeInTheDocument();
+    expect(screen.getByText('Selected content may be sent to AI providers.')).toBeInTheDocument();
+    expect(screen.queryByText(/Ask follow-up questions about selected content/)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ask AI' })).toBeDisabled();
-    expect(screen.getByText('Select workspace content and enter a question to enable sending.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Summarize selected item' })).toBeDisabled();
+    expect(screen.queryByText(/Select a card, message range or file to give the assistant context/)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Summarize' })).toBeDisabled();
   });
 
   it('TC-AI-06: explains disabled workspace consent and prevents content requests', () => {
@@ -42,7 +42,7 @@ describe('AiPanel', () => {
 
     expect(screen.getByText(/AI is off for this workspace/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ask AI' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Summarize selected item' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Summarize' })).toBeDisabled();
     expect(apiMock).not.toHaveBeenCalled();
   });
 
@@ -110,7 +110,7 @@ describe('AiPanel', () => {
     apiMock.mockResolvedValue({ summary: 'A short study guide.', provider: 'gemini' });
     renderPanel();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Summarize selected item' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Summarize' }));
 
     expect(await screen.findByRole('region', { name: 'AI summary' })).toHaveTextContent('A short study guide.');
     expect(apiMock).toHaveBeenCalledWith('/workspaces/workspace-1/ai/summarize', {
@@ -123,9 +123,9 @@ describe('AiPanel', () => {
     aiContext.select([{ type: 'card', id: 'card-1', label: 'Plan the release' }]);
     renderPanel();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear selected context' }));
 
-    expect(screen.getByText(/Select a card, message range or file/)).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Selected AI context' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ask AI' })).toBeDisabled();
   });
 

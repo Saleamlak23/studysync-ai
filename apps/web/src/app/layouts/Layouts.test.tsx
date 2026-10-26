@@ -253,6 +253,16 @@ describe('Layouts (NFR-12)', () => {
 
       // AI assistant landmark
       expect(screen.getByRole('complementary', { name: 'AI assistant' })).toBeInTheDocument();
+      const resizeHandle = screen.getByRole('separator', { name: 'Resize AI assistant' });
+      expect(resizeHandle).toHaveAttribute('aria-valuenow', '320');
+      fireEvent.keyDown(resizeHandle, { key: 'ArrowLeft' });
+      expect(resizeHandle).toHaveAttribute('aria-valuenow', '336');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse AI assistant' }));
+      expect(screen.getByRole('button', { name: 'Expand AI assistant' })).toBeInTheDocument();
+      expect(resizeHandle).toHaveAttribute('tabindex', '-1');
+      fireEvent.click(screen.getByRole('button', { name: 'Expand AI assistant' }));
+      expect(resizeHandle).toHaveAttribute('tabindex', '0');
     });
 
     it('opens mobile/tablet AI assistant sheet when toggle button is clicked', async () => {

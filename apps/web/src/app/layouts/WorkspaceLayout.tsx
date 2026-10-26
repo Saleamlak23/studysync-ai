@@ -1,5 +1,5 @@
-import { FileText, Kanban, MessageSquare, Settings, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { FileText, Kanban, MessageSquare, PanelRightOpen, Settings, Sparkles } from 'lucide-react';
+import { useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
 import { NavLink, Outlet, useParams } from 'react-router-dom';
 import { AiPanel } from '@/features/ai';
 import { useWorkspaceFileSummary } from '@/features/files';
@@ -10,11 +10,31 @@ import { Sheet } from '@/shared/ui/index.js';
 export function WorkspaceLayout() {
   const { workspaceId = '' } = useParams<{ workspaceId: string }>();
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [isAiCollapsed, setIsAiCollapsed] = useState(false);
+  const [aiPanelWidth, setAiPanelWidth] = useState(320);
+  const resizeStart = useRef<{ clientX: number; width: number } | null>(null);
   const isMobile = useMediaQuery('(max-width: 767px)');
   const fileSummary = useWorkspaceFileSummary(workspaceId);
   const fileCount = fileSummary.data?.fileCount;
 
   const base = `/w/${workspaceId}`;
+  const minAiPanelWidth = 280;
+  const maxAiPanelWidth = 640;
+
+  function resizeAiPanel(event: PointerEvent<HTMLDivElement>) {
+    if (!resizeStart.current) return;
+    const nextWidth = resizeStart.current.width + resizeStart.current.clientX - event.clientX;
+    setAiPanelWidth(Math.max(minAiPanelWidth, Math.min(maxAiPanelWidth, nextWidth)));
+  }
+
+  function resizeAiPanelWithKeyboard(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'ArrowLeft') setAiPanelWidth((width) => Math.min(maxAiPanelWidth, width + 16));
+    else if (event.key === 'ArrowRight') setAiPanelWidth((width) => Math.max(minAiPanelWidth, width - 16));
+    else if (event.key === 'Home') setAiPanelWidth(minAiPanelWidth);
+    else if (event.key === 'End') setAiPanelWidth(maxAiPanelWidth);
+    else return;
+    event.preventDefault();
+  }
 
   return (
     <div className="relative flex h-full w-full overflow-hidden pb-(--size-bottom-nav) md:pb-0">
@@ -44,12 +64,36 @@ export function WorkspaceLayout() {
         </div>
       </div>
 
-      {/* Docked AI panel on >= xl */}
+      {/* Resizable AI panel on >= xl */}
+      <div
+        role="separator"
+        aria-label="Resize AI assistant"
+        aria-orientation="vertical"
+        aria-valuemin={minAiPanelWidth}
+        aria-valuemax={maxAiPanelWidth}
+        aria-valuenow={aiPanelWidth}
+        tabIndex={isAiCollapsed ? -1 : 0}
+        onPointerDown={(event) => { resizeStart.current = { clientX: event.clientX, width: aiPanelWidth }; event.currentTarget.setPointerCapture(event.pointerId); }}
+        onPointerMove={resizeAiPanel}
+        onPointerUp={(event) => { resizeStart.current = null; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
+        onPointerCancel={() => { resizeStart.current = null; }}
+        onKeyDown={resizeAiPanelWithKeyboard}
+        className={`${isAiCollapsed ? 'hidden' : 'hidden xl:block'} w-1 shrink-0 cursor-col-resize touch-none bg-transparent hover:bg-ai-soft focus-visible:bg-ai-soft`}
+      />
       <aside
-        aria-label="AI assistant"
-        className="hidden xl:flex flex-col w-(--size-ai-panel) shrink-0 border-l border-line bg-surface overflow-y-auto"
+        aria-label={isAiCollapsed ? undefined : 'AI assistant'}
+        className={`hidden xl:flex h-full shrink-0 border-l border-line bg-surface ${isAiCollapsed ? 'w-10 flex-col items-center' : 'flex-col overflow-hidden'}`}
+        style={isAiCollapsed ? undefined : { width: aiPanelWidth }}
       >
-        <AiPanel workspaceId={workspaceId} />
+        {isAiCollapsed
+          ? <button
+            type="button"
+            aria-label="Expand AI assistant"
+            title="Expand AI assistant"
+            onClick={() => setIsAiCollapsed(false)}
+            className="mt-2 inline-flex min-h-11 min-w-10 items-center justify-center text-fg-muted hover:bg-surface-muted hover:text-fg"
+          ><PanelRightOpen aria-hidden="true" className="size-4" strokeWidth={1.75} /></button>
+          : <AiPanel workspaceId={workspaceId} onCollapse={() => setIsAiCollapsed(true)} />}
       </aside>
 
       <nav
