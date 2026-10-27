@@ -38,4 +38,27 @@ describe('AI context store', () => {
 
     expect(result.current.items).toEqual([{ type: 'file', id: 'file-1', label: 'New selection' }]);
   });
+
+  it('TC-AI-02: adds a card to existing context once and requests the assistant to open', () => {
+    const { result } = renderHook(() => useAiContext());
+    let assistantOpenCount = 0;
+    const openAssistant = () => {
+      assistantOpenCount += 1;
+    };
+    const unsubscribe = aiContext.subscribeToAssistantOpen(openAssistant);
+    act(() => result.current.select([{ type: 'file', id: 'file-1', label: 'Requirements.pdf' }]));
+
+    act(() => {
+      result.current.add({ type: 'card', id: 'card-1', label: 'Design login page' });
+      result.current.add({ type: 'card', id: 'card-1', label: 'Design login page' });
+      aiContext.requestAssistantOpen();
+    });
+
+    expect(result.current.items).toEqual([
+      { type: 'file', id: 'file-1', label: 'Requirements.pdf' },
+      { type: 'card', id: 'card-1', label: 'Design login page' },
+    ]);
+    expect(assistantOpenCount).toBe(1);
+    unsubscribe();
+  });
 });

@@ -1,10 +1,11 @@
 import { FileText, Kanban, MessageSquare, PanelRightOpen, Settings, Sparkles } from 'lucide-react';
-import { useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
 import { NavLink, Outlet, useParams } from 'react-router-dom';
 import { AiPanel } from '@/features/ai';
 import { useWorkspaceFileSummary } from '@/features/files';
 import { SearchBox } from '@/features/search';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery.js';
+import { aiContext } from '@/shared/stores/aiContext.js';
 import { Sheet } from '@/shared/ui/index.js';
 
 export function WorkspaceLayout() {
@@ -14,8 +15,14 @@ export function WorkspaceLayout() {
   const [aiPanelWidth, setAiPanelWidth] = useState(320);
   const resizeStart = useRef<{ clientX: number; width: number } | null>(null);
   const isMobile = useMediaQuery('(max-width: 767px)');
+  const isDesktop = useMediaQuery('(min-width: 1280px)');
   const fileSummary = useWorkspaceFileSummary(workspaceId);
   const fileCount = fileSummary.data?.fileCount;
+
+  useEffect(() => aiContext.subscribeToAssistantOpen(() => {
+    setIsAiCollapsed(false);
+    if (!isDesktop) setIsAiOpen(true);
+  }), [isDesktop]);
 
   const base = `/w/${workspaceId}`;
   const minAiPanelWidth = 280;

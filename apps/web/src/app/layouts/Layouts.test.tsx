@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdminLayout, AppShell, AuthLayout, WorkspaceLayout } from './index.js';
 import * as sessionModule from '@/shared/lib/session.js';
+import { aiContext } from '@/shared/stores/aiContext.js';
 
 vi.mock('@/shared/lib/session.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/lib/session.js')>();
@@ -284,6 +285,22 @@ describe('Layouts (NFR-12)', () => {
       });
       expect(within(screen.getByRole('dialog')).getByRole('textbox', { name: 'Ask a question' })).toBeInTheDocument();
       expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'Break down a project' })).toBeInTheDocument();
+    });
+
+    it('opens the assistant when a card is added to AI context', async () => {
+      renderWithProviders(
+        <Routes>
+          <Route path="/w/:workspaceId" element={<WorkspaceLayout />}>
+            <Route index element={<div>Workspace Home</div>} />
+          </Route>
+        </Routes>,
+        ['/w/ws-100'],
+      );
+
+      act(() => aiContext.requestAssistantOpen());
+
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+      expect(within(screen.getByRole('dialog')).getByRole('textbox', { name: 'Ask a question' })).toBeInTheDocument();
     });
   });
 

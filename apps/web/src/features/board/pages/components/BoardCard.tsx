@@ -1,8 +1,9 @@
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Sparkles } from 'lucide-react';
 import type { Priority } from '@studysync/shared';
 import { Badge, Card } from '@/shared/ui/index.js';
+import { aiContext, useAiContext } from '@/shared/stores/aiContext.js';
 import type { BoardCard as BoardCardData, BoardList } from '../board.api.js';
 
 const priorityVariant = {
@@ -22,6 +23,8 @@ type BoardCardProps = {
 
 export function BoardCard({ card, listId, idPrefix, lists, onMove, onOpen }: BoardCardProps) {
   const assigneeNames = card.assignees.map(({ user }) => user.name);
+  const { items } = useAiContext();
+  const isInAiChat = items.some((item) => item.type === 'card' && item.id === card.id);
   const draggableId = `${idPrefix}:card:${card.id}`;
   const draggable = useDraggable({
     id: draggableId,
@@ -64,6 +67,18 @@ export function BoardCard({ card, listId, idPrefix, lists, onMove, onOpen }: Boa
             <span key={name} className="max-w-full break-words text-xs text-fg-muted">{name}</span>
           ))}
         </div>
+        <button
+          type="button"
+          aria-label={`Add ${card.title} to AI chat`}
+          onClick={() => {
+            aiContext.add({ type: 'card', id: card.id, label: card.title });
+            aiContext.requestAssistantOpen();
+          }}
+          className="inline-flex min-h-(--size-touch) w-full items-center justify-center gap-2 rounded-md border border-ai-soft-line bg-ai-soft px-3 text-sm font-medium text-ai hover:bg-ai-soft/80"
+        >
+          <Sparkles aria-hidden="true" className="size-4" strokeWidth={1.75} />
+          {isInAiChat ? 'In AI chat' : 'Add to AI chat'}
+        </button>
         {destinationLists.length > 0 && (
           <label className="flex min-h-(--size-touch) items-center gap-2 border-t border-line pt-2 text-xs text-fg-muted">
             <span className="shrink-0">Move to list</span>
