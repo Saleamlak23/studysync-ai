@@ -67,6 +67,32 @@ describe('files components', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
+  it('TC-FILE-02: shows a friendly message when a file download request fails', async () => {
+    const file = {
+      id: 'file-1',
+      name: 'project-summary.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 1024,
+      uploader: { id: 'user-1', name: 'Student', avatarUrl: null },
+      createdAt: '2026-10-27T00:00:00.000Z',
+    };
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('/files/summary')) return Promise.resolve(response(summary));
+      if (url.includes('/files/file-1')) return Promise.reject(new TypeError('Network request failed'));
+      return Promise.resolve(response([file]));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderWithQueryClient(<FilesPanel workspaceId="workspace-1" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Download project-summary.pdf' }));
+
+    const downloadMessage = "We couldn't download this file. Check your connection and try again.";
+    const downloadAlert = await screen.findByText(downloadMessage);
+    expect(downloadAlert.closest('[role="alert"]')).toHaveTextContent(downloadMessage);
+    expect(screen.getByText('project-summary.pdf')).toBeInTheDocument();
+  });
+
   it('TC-FILE-04: displays file count and workspace storage capacity', async () => {
     vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) =>
       Promise.resolve(response(String(input).endsWith('/files/summary')

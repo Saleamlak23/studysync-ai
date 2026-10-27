@@ -26,6 +26,12 @@ function fileError(error: unknown): string {
   return error instanceof ApiError ? error.message : 'The file action could not be completed. Try again.';
 }
 
+function downloadError(error: unknown): string {
+  return error instanceof ApiError
+    ? error.message
+    : "We couldn't download this file. Check your connection and try again.";
+}
+
 function uploadFile(workspaceId: string, file: File): Promise<WorkspaceFile> {
   const body = new FormData();
   body.append('file', file);
@@ -101,10 +107,10 @@ function DownloadControl({ file, compact = false }: { file: AttachedFile; compac
   const [message, setMessage] = useState<string | null>(null);
   const mutation = useMutation({
     mutationFn: () => downloadFile(file),
-    onError: (error) => setMessage(fileError(error)),
+    onError: (error) => setMessage(downloadError(error)),
   });
 
-  return <div className={`flex min-w-0 items-center gap-3 rounded-md border border-line bg-surface p-3 ${compact ? 'w-full' : ''}`}>
+  return <div className={`flex min-w-0 flex-wrap items-center gap-3 rounded-md border border-line bg-surface p-3 ${compact ? 'w-full' : ''}`}>
     <div className="min-w-0 flex-1">
       <p className="break-all text-sm font-medium text-fg">{file.name}</p>
       <p className="text-xs text-fg-muted">{formatBytes(file.sizeBytes)}</p>
