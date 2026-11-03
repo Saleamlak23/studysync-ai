@@ -45,13 +45,11 @@ services:
         value: "104857600"
 
   # ---------------------------------------------------------------------------
-  # StudySync AI Frontend Static Site
+  # StudySync AI Frontend Static Site (Served globally via Render CDN)
   # ---------------------------------------------------------------------------
   - type: web
     name: studysync-web
     runtime: static
-    plan: free
-    region: frankfurt
     buildCommand: npm install && npm run build -w packages/shared && npm run build -w apps/web
     staticPublishPath: ./apps/web/dist
     routes:
