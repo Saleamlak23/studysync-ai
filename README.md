@@ -7,6 +7,7 @@ Graduation project, College of Technology and Built Environment, Addis Ababa Uni
 ## Contents
 
 - [Features](#features)
+- [Feature screenshots](#feature-screenshots)
 - [Tech stack](#tech-stack)
 - [Repository structure](#repository-structure)
 - [Getting started](#getting-started)
@@ -30,6 +31,28 @@ Must-have scope of SRS v2.0:
 - Full-text search across cards, messages and file names
 - AI assistant: answer from selected context, summarize chats, cards and files, and break a project into cards (preview, edit, confirm), with consent, limits and provider fallback
 - Progress dashboard and a minimal System Admin area (users, AI usage, AI limits)
+
+## Feature screenshots
+
+### Dashboard overview
+
+![StudySync AI dashboard](docs/dashboard.png)
+
+### Kanban board
+
+![StudySync AI board](docs/board.png)
+
+### AI assistant
+
+![StudySync AI assistant](docs/ai.png)
+
+### Team chat and files
+
+![StudySync AI chat](docs/chat.png)
+
+### Notifications
+
+![StudySync AI notifications](docs/notifications.png)
 
 ## Tech stack
 
@@ -174,6 +197,7 @@ Each requirement has a test case ID (for example `TC-AUTH-02`) listed in the tra
 - Run `npx prisma migrate deploy` as part of each release.
 - Set every server variable in the host's environment settings, never in the repository.
 - Free hosts sleep when idle: set up a keep-warm ping before the demo and take a database backup first.
+- For a Render deployment, follow [the Render deployment guide](docs/DEPLOY-RENDER.md).
 
 ## Project documents
 
