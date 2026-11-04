@@ -6,6 +6,9 @@ Graduation project, College of Technology and Built Environment, Addis Ababa Uni
 
 ## Contents
 
+- [Live Demo & Presentation](#live-demo--presentation)
+- [Test Accounts for Evaluation](#test-accounts-for-evaluation)
+
 - [Features](#features)
 - [Feature screenshots](#feature-screenshots)
 - [Tech stack](#tech-stack)
@@ -17,6 +20,26 @@ Graduation project, College of Technology and Built Environment, Addis Ababa Uni
 - [Deployment](#deployment)
 - [Project documents](#project-documents)
 - [Team](#team)
+
+## Live Demo & Presentation
+
+- **Deployed Web Application:** [https://studysync-web-bml8.onrender.com/](https://studysync-web-bml8.onrender.com/)
+- **Presentation & Slides (Google Drive):** [StudySync AI Presentation Materials](https://drive.google.com/drive/folders/1F6NKlULHsMeeKuLavgdM2YPaYch_ItnU?usp=sharing)
+
+## Test Accounts for Evaluation
+
+All test accounts share the same password: **`Password123!`**
+
+| User / Role | Email | Notes & Workspace Access |
+|---|---|---|
+| **Abel** (Student / Member) | `abel@example.com` | Member in main project workspace; Owner of Research workspace |
+| **Workspace Owner** | `workspace-owner-2470b625-cd7e-4ff0-b28e-3594a0c11f17@example.test` | Owner of main project workspace |
+| **Workspace Admin** | `admin@studysync.test` | Admin in both workspaces |
+| **System Admin** | `sysadmin@studysync.test` | System Administrator (`systemRole: ADMIN`), can access `/admin` |
+| **Sara Tefera** | `sara@studysync.test` | Team collaborator (Member) |
+| **Yared Tewelde** | `yared@studysync.test` | Team collaborator (Member) |
+| **Demo Student** | `student1@studysync.test` | Quick test login (Member) |
+| **Suspended User** | `suspended@studysync.test` | Used for testing account suspension & access restrictions |
 
 ## Features
 
@@ -210,6 +233,7 @@ Keep exported copies in `docs/` and update them when a contract changes:
 - Requirements traceability matrix
 - Test plan and test cases
 - UI wireframes (desktop and mobile)
+- [Project Presentation & Slides (Google Drive)](https://drive.google.com/drive/folders/1F6NKlULHsMeeKuLavgdM2YPaYch_ItnU?usp=sharing)
 
 ## Team
 
