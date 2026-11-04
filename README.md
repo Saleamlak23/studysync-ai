@@ -237,13 +237,12 @@ Keep exported copies in `docs/` and update them when a contract changes:
 
 ## Team
 
-| Name | Role |
-|---|---|
-| Saleamlak Setie | Team leader |
-| Rufta Gaiem | Developer |
-| Yared Teweldebirhan | Developer |
+| Name | Role | CTC ID |
+|---|---|---|
+| Saleamlak Setie | Team leader | CTC-1744-26
+| Rufta Gaiem | Developer | CTC-3467-26
+| Yared Teweldebirhan | Developer | CTC-417-26
 
-Supervisor: _add name_
 
 ## License
 
