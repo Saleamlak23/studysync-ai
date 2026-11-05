@@ -2,7 +2,7 @@
 
 An AI collaborative study and project workspace for student teams. Create a workspace, plan work on a shared Kanban board, chat in real time, share files, and use an AI assistant that works on your own workspace content, including turning a project description into real board cards.
 
-Graduation project, College of Technology and Built Environment, Addis Ababa University. Team of three, about 8 weeks.
+Graduation project, Information Network Security Administration (INSA). Team of three, about 8 weeks.
 
 ## Contents
 
